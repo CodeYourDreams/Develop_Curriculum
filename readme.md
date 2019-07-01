@@ -1,5 +1,5 @@
 # Code Your Dreams
-[![Code Your Dreams][cyd-image]][cyd-url]
+<img src="https://user-images.githubusercontent.com/30474080/60455473-0f2a3900-9bfc-11e9-89f3-64320b84742a.png" width="100" height="100" />
 ## Code Your Dreams helps students build community focused applications from ideation to delivery
 ## Usage
 This repository contains the Code Your Dreams "Development" portion of its year-long curriculum for high school students.
