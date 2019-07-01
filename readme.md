@@ -1,5 +1,5 @@
 # Code Your Dreams
-[![CYD Version][cyd-image]][cyd-url]
+[![Code Your Dreams][cyd-image]][cyd-url]
 ## Code Your Dreams helps students build community focused applications from ideation to delivery
 ## Usage
 This repository contains the Code Your Dreams "Development" portion of its year-long curriculum for high school students.
