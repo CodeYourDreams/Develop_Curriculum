@@ -17,10 +17,10 @@ Thank you to our fabulous Code Your Dreams team of volunteers, teachers and inte
 [![CYD Version][cyd-image]][cyd-url]
 
 <!-- Markdown link & img dfn's -->
-[cyd-image]: https://user-images.githubusercontent.com/30474080/60459291-5d443a00-9c06-11e9-808e-c2db23cac931.png
-[cyd-url]: https://user-images.githubusercontent.com/30474080/60459291-5d443a00-9c06-11e9-808e-c2db23cac931.png
-[overview-image]: https://user-images.githubusercontent.com/30474080/60456272-75b05680-9bfe-11e9-87aa-46d9f55f0363.png
-[overview-url]: https://user-images.githubusercontent.com/30474080/60456272-75b05680-9bfe-11e9-87aa-46d9f55f0363.png
+[cyd-image]: https://user-images.githubusercontent.com/30474080/60455473-0f2a3900-9bfc-11e9-89f3-64320b84742a.png
+[cyd-url]: https://user-images.githubusercontent.com/30474080/60455473-0f2a3900-9bfc-11e9-89f3-64320b84742a.png
+[overview-image]: https://user-images.githubusercontent.com/30474080/60459291-5d443a00-9c06-11e9-808e-c2db23cac931.png
+[overview-url]: https://user-images.githubusercontent.com/30474080/60459291-5d443a00-9c06-11e9-808e-c2db23cac931.png
 
 
 
