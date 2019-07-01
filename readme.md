@@ -1,5 +1,5 @@
 # Code Your Dreams
-[npm-image]: ![cyd_logo_fuschia](https://user-images.githubusercontent.com/30474080/60455473-0f2a3900-9bfc-11e9-89f3-64320b84742a.png
+![cyd_logo_fuschia](https://user-images.githubusercontent.com/30474080/60455473-0f2a3900-9bfc-11e9-89f3-64320b84742a.png
 ## Code Your Dreams helps students build community focused applications from ideation to delivery
 ## Usage
 This repository contains the Code Your Dreams "Development" portion of its year-long curriculum for high school students.
