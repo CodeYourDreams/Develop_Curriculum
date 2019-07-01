@@ -1,5 +1,3 @@
-<snippet>
-  <content><![CDATA[
 # ${1:Code Your Dreams}
 Code Your Dreams helps students build community focused applications from ideation to delivery
 ## Usage
@@ -14,6 +12,4 @@ Visit us at [Code Your Dreams](http://codeyourdreams.org)
 Thank you to our fabulous Code Your Dreams team of volunteers, teachers and interns. 
 ## License
 TODO: Write license
-]]></content>
-  <tabTrigger>readme</tabTrigger>
-</snippet>
+
