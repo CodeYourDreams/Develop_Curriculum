@@ -2,7 +2,7 @@
 ## Code Your Dreams helps students build community focused applications from ideation to delivery
 [![CYD Overview][overview-image]][overview-url]
 ## Usage
-This repository contains the Code Your Dreams "Development" portion of its year-long curriculum for high school students. Topics of community and social justice are tied in with core computer science and Python topics across the curriculum. Take a look at this [Develop Curriculum Map](https://github.com/CodeYourDreams/Develop_Curriculum/blob/master/Curriculum_Map.md) for the curriculum structure and lesson outlines. 
+This repository contains the Code Your Dreams "Development" portion of its year-long curriculum for high school students. Topics of community and social justice are tied in with core computer science and Python topics across the curriculum. Take a look at this [Develop Curriculum Map](https://github.com/CodeYourDreams/Develop_Curriculum/blob/master/Curriculum_Map.md) for the curriculum structure.
 ## Learn More
 Visit us at [Code Your Dreams](http://codeyourdreams.org)
 ## Learn More
