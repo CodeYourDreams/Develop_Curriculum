@@ -1,4 +1,5 @@
 {
+  "type": "FeatureCollection",
   "features": [
     {
       "type": "Feature",
@@ -8988,6 +8989,5 @@
       },
       "id": "fe75b2a477213629ceace9e3c59f0018"
     }
-  ],
-  "type": "FeatureCollection"
+  ]
 }
