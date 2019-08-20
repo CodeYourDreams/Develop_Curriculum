@@ -9,9 +9,11 @@ from flask_bootstrap import Bootstrap
 
 from mongoengine import *
 
+
 import pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+
 
 app = Flask(__name__)
 
@@ -24,41 +26,68 @@ app.config[ 'SECRET_KEY' ] = 'jsbcfsbfjefebw237u3gdbdc' # encrypts messages
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['POSTS_PER_PAGE'] = 30
 
-#client = pymongo.MongoClient("mongodb+srv://apouba:Codeyourdreams@cluster0-x2fzi.mongodb.net/test")
+client = pymongo.MongoClient("mongodb+srv://apouba:Codeyourdreams@cluster0-x2fzi.mongodb.net/test")
+#client = pymongo.MongoClient("mongodb+srv://apouba:Codeyourdreams@cluster0-x2fzi.mongodb.net/test?retryWrites=true&w=majority")
 # client = pymongo.MongoClient("mongodb+srv://apouba:Codeyourdreams@cluster0-x2fzi.mongodb.net/test?retryWrites=true&w=majority")
-client = pymongo.MongoClient("mongodb+srv://apouba:Codeyourdreams@cluster0-x2fzi.mongodb.net/test?retryWrites=true&w=majority")
+# mongodb+srv://apouba:<password>@cluster0-x2fzi.mongodb.net/test
+
 db = client.ChatInfo
 messages = db.messages # collection
 users = db.user # collection
-connect('Project0')
+
 
 Migrate(app,db)
 login = LoginManager()
 login.init_app(app)
 bootstrap = Bootstrap(app)
 
-# connect('Project0')
+connect('Project0')
 ##########################
 ### MODELS#################
 #####################
 
 
-class User(Document):
+users = {
+    '_id' : db.users.count(),
+    'username' : 'Guest',
+    'last_seen' : datetime.datetime.now(),
+    'messages_sent' : [{}, ...],
+    'messages_recieved' : [{}, ...],
+    'last_message_read_time' : datetime.datetime.now()
+}
+
+
+
+class User(Document, UserMixin, AnonymousUserMixin):
     username = StringField(max_length = 25, required = True)
-    # id = IntField(required=True)
+    id = IntField(default = 0)
+    # user_id = User.objects.count()
     last_seen = DateTimeField(default = datetime.datetime.now())
     last_message_read_time = DateTimeField(default = datetime.datetime.now())
 
-    # def __repr__(self):
-    #     return '<User {}>'.format(self.username)
+    def is_active(self):
+        return True
+
+    def is_authenticated(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.username
+
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
     #
     # def new_messages(self):
     #     last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
     #     return Message.query.filter_by(recipient=self).filter(
     #         Message.timestamp > last_read_time).count()
 
-    # def __init__(self,username):
+    # def __init__(self, username):
     #     self.username = username
+    # mongoengine doesn't need init
 
 class Message(Document):
     author = ReferenceField(User)
@@ -80,8 +109,11 @@ class MRecieved(Message):
 
 
 @login.user_loader
-def load_user(id):
-    pass
+def load_user(username):
+    u = db.users.find_one({"username" : username})
+    if not u:
+        return None
+    return User(username = u['username'])
 #
 # @login_manager.user_loader
 # def load_user(user_id):
@@ -99,20 +131,35 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        print('here')
+        # user = User.query.filter_by(username=form.username.data).first()
+        user = db.users.find_one({'username': form.username.data})
+
+        if user is None:
+            user = {
+                'username' : form.username.data,
+                'last_seen' : datetime.datetime.now(),
+                'last_message_read_time' : datetime.datetime.now()
+            }
+            # user = User(username=form.username.data)
+            community = db.users.insert_one(user)
+            print(2)
         new_user = User(username=form.username.data)
-        print('AAAAAAA')
-        ## not adding to database
-        user2 = User(username = 'ex@wxample.com').save()
-        print('BBBBB')
-        community = db.users.insert_one(new_user)
-        print('1')
-        new_user.last_seen = datetime.datetime.now().save()
-        print('2')
-        new_user.last_message_read_time = datetime.datetime.now().save()
+        # user.last_seen = datetime.datetime.now()
+        # user.last_message_read_time = datetime.datetime.now()
+        # user.save()
+
+        #user_obj = User(username=user['username'])
+        login_user(new_user, force = True, fresh = True)
+
+        #
+        # # new_user = User(username=form.username.data)
+        # # user2 = User(username = 'ex@wxample.com').save()
+        # community = db.users.insert_one(new_user)
+        # new_user.last_seen = datetime.datetime.now()
+        # new_user.last_message_read_time = datetime.datetime.now()
+        # community = db.users.update_one(new_user)
 
         # community = users.insert_one(user)
-        print('here2')
 
         return redirect(url_for('chat'))
     return render_template('cs_login.html', title='Sign In', form=form)
@@ -137,23 +184,20 @@ def send_message(recipient):
 
 
 @app.route('/messages', methods=['GET', 'POST'])
+@login_required
 def chat():
 
-    # db.users.replace_one({'username' : current_user },
-    #                     {'last_message_read_time' : datetime.datetime.now()})
     form = MessageForm()
-    message = 'form not working'
     if form.validate_on_submit():
-        hey = "hey"
-        new_message = {'sender_id' : 'guest21',
-                                'recipient_id' : form.recipient.data,
-                                'body' : form.body.data,
-                                'timestamp' : '12'
-        }
-        chat = db.messages.insert_one(new_message)
+        new_message = Message(author=current_user, recipient = form.recipient.data,
+                            body = form.body.data, timestamp = datetime.datetime.now()).save()
+        # new_message = {'sender_id' : 'guest21',
+        #                         'recipient_id' : form.recipient.data,
+        #                         'body' : form.body.data,
+        #                         'timestamp' : '12'
+        # }
+        # chat = db.messages.insert_one(new_message)
 
-    # print(hey)
-    print(message)
     flash(form.errors)
 
     page = request.args.get('page', 1, type=int)
