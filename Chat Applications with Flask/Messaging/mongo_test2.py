@@ -56,14 +56,43 @@ users = {
     'last_message_read_time' : datetime.datetime.now()
 }
 
+messages = {
+    '_id' : db.messages.count(),
+    'author' : 'Guest',
+    'recipient' : 'Guest',
+    'body' : 'BODY',
+    'timestamp' : datetime.datetime.now()
+}
+
+
+class Message(EmbeddedDocument): # DynamicDocument ? / Embedded ?
+    author = StringField()
+    recipient = StringField()
+    body = StringField()
+    timestamp = DateTimeField(default = datetime.datetime.now())
+
+    # messages_sent = ListField(ReferenceField('User'))
+    # messages_recieved = ListField(ReferenceField('User'))
+
+    meta = {'allow_inheritance' : True}
+
+    def __repr__(self):
+        return '<Message {}>'.format(self.body)
+
+class MSent(Message):
+    content = StringField()
+class MRecieved(Message):
+    content = StringField()
 
 
 class User(Document, UserMixin, AnonymousUserMixin):
-    username = StringField(max_length = 25, required = True)
+    username = StringField(max_length = 25)
     id = IntField(default = 0)
     # user_id = User.objects.count()
     last_seen = DateTimeField(default = datetime.datetime.now())
     last_message_read_time = DateTimeField(default = datetime.datetime.now())
+    messages_sent = EmbeddedDocumentField(Message)
+    messages_recieved = EmbeddedDocumentField(Message)
 
     def is_active(self):
         return True
@@ -89,23 +118,7 @@ class User(Document, UserMixin, AnonymousUserMixin):
     #     self.username = username
     # mongoengine doesn't need init
 
-class Message(Document):
-    author = ReferenceField(User)
-    recipient = ReferenceField(User)
-    body = StringField()
-    timestamp = DateTimeField(default = datetime.datetime.now())
 
-
-    meta = {'allow_inheritance' : True}
-
-    def __repr__(self):
-        return '<Message {}>'.format(self.body)
-
-class MSent(Message):
-    content = StringField()
-
-class MRecieved(Message):
-    content = StringField()
 
 
 @login.user_loader
@@ -133,7 +146,6 @@ def login():
     if form.validate_on_submit():
         # user = User.query.filter_by(username=form.username.data).first()
         user = db.users.find_one({'username': form.username.data})
-
         if user is None:
             user = {
                 'username' : form.username.data,
@@ -141,25 +153,14 @@ def login():
                 'last_message_read_time' : datetime.datetime.now()
             }
             # user = User(username=form.username.data)
-            community = db.users.insert_one(user)
-            print(2)
-        new_user = User(username=form.username.data)
-        # user.last_seen = datetime.datetime.now()
-        # user.last_message_read_time = datetime.datetime.now()
-        # user.save()
+            community = db.users.insert_one(user) # for mongodb
 
-        #user_obj = User(username=user['username'])
+        new_user = User(username=form.username.data) # for flask_login
+        new_user.last_seen = datetime.datetime.now()
+        new_user.last_message_read_time = datetime.datetime.now()
+        new_user.save()
         login_user(new_user, force = True, fresh = True)
 
-        #
-        # # new_user = User(username=form.username.data)
-        # # user2 = User(username = 'ex@wxample.com').save()
-        # community = db.users.insert_one(new_user)
-        # new_user.last_seen = datetime.datetime.now()
-        # new_user.last_message_read_time = datetime.datetime.now()
-        # community = db.users.update_one(new_user)
-
-        # community = users.insert_one(user)
 
         return redirect(url_for('chat'))
     return render_template('cs_login.html', title='Sign In', form=form)
@@ -189,14 +190,25 @@ def chat():
 
     form = MessageForm()
     if form.validate_on_submit():
-        new_message = Message(author=current_user, recipient = form.recipient.data,
-                            body = form.body.data, timestamp = datetime.datetime.now()).save()
-        # new_message = {'sender_id' : 'guest21',
-        #                         'recipient_id' : form.recipient.data,
-        #                         'body' : form.body.data,
-        #                         'timestamp' : '12'
-        # }
-        # chat = db.messages.insert_one(new_message)
+        user = current_user
+        msg = {
+            'author' : user.username,
+            'recipient' : form.recipient.data,
+            'body' : form.body.data,
+            'timestamp' : datetime.datetime.now()
+        }
+        chat = db.messages.insert_one(msg)
+
+    new_message = Message(author=current_user.username,
+                            recipient=form.recipient.data,
+                            body=form.body.data,
+                            timestamp=datetime.datetime.now())
+
+    # add msg to users' messages_sent & messages_received
+    sending = User(username = current_user.username,
+                    messages_sent = new_message).save()
+    receiving = User(username = form.recipient.data,
+                    messages_recieved = new_message).save()
 
     flash(form.errors)
 
