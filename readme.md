@@ -1,7 +1,8 @@
 # Code Your Dreams
 ## Code Your Dreams is a 501c3 non-profit that helps students build community focused applications from ideation to delivery.
 
-## Our mission is to amplify the voices of younger generations and embolden them to think critically, creatively and empathetically. We do this by by teaching our students how to build the applications they dream of for a better world. 
+## Our mission 
+Our mission is to amplify the voices of younger generations and embolden them to think critically, creatively and empathetically. We do this by by teaching our students how to build the applications they dream of for a better world. 
 
 [![CYD Overview][overview-image]][overview-url]
 ## Usage
