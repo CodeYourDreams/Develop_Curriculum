@@ -1,5 +1,5 @@
 # Code Your Dreams
-## Code Your Dreams is a 501c3 non-profit that helps students build community focused applications from ideation to delivery. 
+## Code Your Dreams is a 501c3 non-profit that helps students build community focused applications from ideation to delivery. Our mission is to amplify the voices of younger generations and embolden them to think critically, creatively and empathetically. We do this by by teaching our students how to build the applications they dream of for a better world. 
 [![CYD Overview][overview-image]][overview-url]
 ## Usage
 This repository contains the Code Your Dreams "Development" portion of its year-long curriculum for students. Topics of community and social justice are tied in with core computer science and Python topics across the curriculum. Take a look at this [Develop Curriculum Map](https://github.com/CodeYourDreams/Develop_Curriculum/blob/master/Curriculum_Map.md) for the curriculum structure.
