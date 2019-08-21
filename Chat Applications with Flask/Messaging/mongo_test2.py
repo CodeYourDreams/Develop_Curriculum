@@ -229,7 +229,11 @@ def chat():
     flash(form.errors)
 
     page = request.args.get('page', 1, type=int)
-    msgs = users['messages_received']
+    msgs = db.messages.find({'recipient' : current_user.username}).sort('timestamp')
+    # msgs = users.find({
+    #                 'username' : current_user.username,
+    #                 })
+    # msgs = users['messages_received']
     # db.messages.messages_received
     # .order_by(
     #     Message.timestamp.desc()).paginate(
