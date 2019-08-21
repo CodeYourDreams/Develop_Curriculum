@@ -2,12 +2,19 @@
 {% extends "chat_site_home.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
+
 {% block content %}
     <h1>{{ ('Messages') }}</h1>
-    {% for post in messages %}
-        {% include '_post.html' %}
+
+    {% for message in msgs %}
+         {% include 'received.html' %}
     {% endfor %}
-    </div>
+
+    {% for message in msgs2 %}
+      {% include 'sent.html' %}
+    {% endfor %}
+
+  
     <h1>Hi, {{ current_user.username }}!</h1>
 
 
@@ -15,7 +22,11 @@
       <div class="fixed_bottom">
         <div class="row">
             <div class="col-md-4">
-                {{ wtf.quick_form(form) }} <br>
+              <form method="POST">
+                {{ form.hidden_tag() }}
+                {{ form.csrf_token }} <br>
+                {{ wtf.quick_form(form) }}
+              </form>
             </div>
         </div>
       </div>
@@ -24,8 +35,8 @@
 <!-- previous messages currently showing in form boxes -->
 
 
-
-    <!-- <div class="container">
+<!--
+    <div class="container">
       <div class="fixed-bottom">
         <div class="row">
             <div class="col-md-4">
@@ -41,10 +52,10 @@
     </div> -->
 
 
-    <nav aria-label="...">
+    <!-- <nav aria-label="...">
         <ul class="pager">
             <li class="previous{% if not prev_url %} disabled{% endif %}">
-                <a href="{{ prev_url }}">
+                <a href="{{ prev_url  or '#'}}">
                     <span aria-hidden="true">&larr;</span> {{ 'Older messages' }}
                 </a>
             </li>
@@ -54,5 +65,5 @@
                 </a>
             </li>
         </ul>
-    </nav>
+    </nav> -->
 {% endblock %}
