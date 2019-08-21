@@ -230,6 +230,7 @@ def chat():
 
     page = request.args.get('page', 1, type=int)
     msgs = db.messages.find({'recipient' : current_user.username}).sort('timestamp')
+                            # 'author' : form.recipient.data}).sort('timestamp')
     # msgs = users.find({
     #                 'username' : current_user.username,
     #                 })
