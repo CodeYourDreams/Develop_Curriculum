@@ -9,7 +9,7 @@ Our mission is to amplify the voices of younger generations and embolden them to
 ## Usage
 This repository contains the Code Your Dreams "Development" portion of its year-long curriculum for students. Topics of community and social justice are tied in with core computer science and Python topics across the curriculum. Take a look at this [Develop Curriculum Map](https://github.com/CodeYourDreams/Develop_Curriculum/blob/master/Curriculum_Map.md) for the curriculum structure.
 ## Learn More
-Visit us at [Code Your Dreams](http://codeyourdreams.org)
+Visit us at [Code Your Dreams](http://codeyourdreams.org)!
 ## Learn More
 1. Visit us at [Code Your Dreams](http://codeyourdreams.org)
 2. Tweet Us at [@codeyourdreams_](http://twitter.com/codeyourdreams_)
