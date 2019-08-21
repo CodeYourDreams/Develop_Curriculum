@@ -48,16 +48,16 @@ connect('Project0')
 
 
 users = {
-    '_id' : db.users.count(),
+    '_id' : ObjectId(),
     'username' : 'Guest',
     'last_seen' : datetime.datetime.now(),
     'messages_sent' : [{}, ...],
-    'messages_recieved' : [{}, ...],
+    'messages_received' : [{}, ...],
     'last_message_read_time' : datetime.datetime.now()
 }
 
 messages = {
-    '_id' : db.messages.count(),
+    '_id' : ObjectId(),
     'author' : 'Guest',
     'recipient' : 'Guest',
     'body' : 'BODY',
@@ -81,18 +81,19 @@ class Message(EmbeddedDocument): # DynamicDocument ? / Embedded ?
 
 class MSent(Message):
     content = StringField()
+
 class MRecieved(Message):
     content = StringField()
 
 
 class User(Document, UserMixin, AnonymousUserMixin):
-    username = StringField(max_length = 25)
+    username = StringField(max_length = 25, Primary=True)
     id = IntField(default = 0)
     # user_id = User.objects.count()
     last_seen = DateTimeField(default = datetime.datetime.now())
     last_message_read_time = DateTimeField(default = datetime.datetime.now())
     messages_sent = EmbeddedDocumentField(Message)
-    messages_recieved = EmbeddedDocumentField(Message)
+    messages_received = EmbeddedDocumentField(Message)
 
     def is_active(self):
         return True
@@ -146,10 +147,12 @@ def login():
     if form.validate_on_submit():
         # user = User.query.filter_by(username=form.username.data).first()
         user = db.users.find_one({'username': form.username.data})
+
         if user is None:
             user = {
                 'username' : form.username.data,
                 'last_seen' : datetime.datetime.now(),
+                'messages_received' : None,
                 'last_message_read_time' : datetime.datetime.now()
             }
             # user = User(username=form.username.data)
@@ -161,6 +164,15 @@ def login():
         new_user.save()
         login_user(new_user, force = True, fresh = True)
 
+        #
+        # # new_user = User(username=form.username.data)
+        # # user2 = User(username = 'ex@wxample.com').save()
+        # community = db.users.insert_one(new_user)
+        # new_user.last_seen = datetime.datetime.now()
+        # new_user.last_message_read_time = datetime.datetime.now()
+        # community = db.users.update_one(new_user)
+
+        # community = users.insert_one(user)
 
         return redirect(url_for('chat'))
     return render_template('cs_login.html', title='Sign In', form=form)
@@ -198,33 +210,38 @@ def chat():
             'timestamp' : datetime.datetime.now()
         }
         chat = db.messages.insert_one(msg)
+        community = db.users.insert_one(msg)
 
     new_message = Message(author=current_user.username,
                             recipient=form.recipient.data,
                             body=form.body.data,
                             timestamp=datetime.datetime.now())
 
-    # add msg to users' messages_sent & messages_received
+    # add msg to user's messages_sent
     sending = User(username = current_user.username,
-                    messages_sent = new_message).save()
-    receiving = User(username = form.recipient.data,
-                    messages_recieved = new_message).save()
+                    messages_sent=new_message).save()
+    recieving = User(username=form.recipient.data,
+                    messages_received=new_message).save()
+
+
+     # {'username'=current_user.username, 'messages_sent'=new_message})
 
     flash(form.errors)
 
     page = request.args.get('page', 1, type=int)
-    messages = db.messages.messages_received
+    msgs = users['messages_received']
+    # db.messages.messages_received
     # .order_by(
     #     Message.timestamp.desc()).paginate(
     #         page, current_app.config['POSTS_PER_PAGE'], False)
 
-    next_url = url_for('index', page=messages.next_num) \
-        if messages.has_next else None
-    prev_url = url_for('login', page=messages.prev_num) \
-        if messages.has_prev else None
+    # next_url = url_for('index', page=messages.next_num) \
+    #     if messages.has_next else None
+    # prev_url = url_for('login', page=messages.prev_num) \
+    #     if messages.has_prev else None
 
-    return render_template('messages.html', form=form,
-                           next_url=next_url, prev_url=prev_url)
+    return render_template('messages.html', form=form, msgs=msgs)
+                           # next_url=next_url, prev_url=prev_url)
 
 
 if __name__ == '__main__':
