@@ -13,7 +13,7 @@ This repository contains the Code Your Dreams "Development" portion of its year-
 2. Tweet Us at [@codeyourdreams_](http://twitter.com/codeyourdreams_)
 3. Email Our Executive Director: brianne@codeyourdreams.org
 ## Code of Conduct
-Learn more about our [Code of Conduct] (https://github.com/CodeYourDreams/Develop_Curriculum/blob/master/Code%20Of%20Conduct.pdf) for all Code Your Dreams related activities. An inclusive community is the best kind of community!
+Learn more about our [Code of Conduct](http://github.com/CodeYourDreams/Develop_Curriculum/blob/master/Code%20Of%20Conduct.pdf) for all Code Your Dreams related activities. An inclusive community is the best kind of community!
 ## Credits
 Thank you to our fabulous Code Your Dreams team of volunteers, teachers and interns. 
 ## License
