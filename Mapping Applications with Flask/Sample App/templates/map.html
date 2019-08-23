@@ -1,0 +1,2861 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Affordable Housing Finder</title>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <!-- The style code should be placed inside a css file for larger projects -->
+    <style media="screen">
+      body {
+        color: #1f1f1f;
+        font: 400 15px/22px 'Source Sans Pro', 'Georgia', Sans-serif;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+        }
+
+       #map {
+          position: absolute;
+          height: 100%;
+          width: 66.6666%;
+          left: 33.3333%;
+        }
+
+        h1 {
+          font-size: 22px;
+          margin: 0;
+          font-weight: 400;
+          line-height: 20px;
+          padding: 20px 2px;
+        }
+        /* webkit calls adjust the various elements to fit different web interfaces */
+        * {
+          -webkit-box-sizing: border-box;
+          -moz-box-sizing: border-box;
+          box-sizing: border-box;
+        }
+
+        a {
+          color: #404040;
+          text-decoration: none;
+        }
+
+        a:hover {
+          color: #101010;
+        }
+
+        .sidebar {
+          position: absolute;
+          width: 33.3333%;
+          height: 100%;
+          overflow: hidden;
+          border-right: 1px solid rgba(0, 0, 0, 0.25);
+        }
+
+        .pad2 {
+          padding: 20px;
+        }
+
+        .heading {
+          background: #39a1c4;
+          border-bottom: 10px solid #eee;
+          height: 60px;
+          line-height: 60px;
+          padding: 0 10px;
+        }
+
+        .listings {
+          height: 100%;
+          overflow: auto;
+          padding-bottom: 60px;
+        }
+
+        .listings .item {
+          display: block;
+          border-bottom: 1px solid #eee;
+          padding: 10px;
+          text-decoration: none;
+        }
+
+        .listings .item:last-child { border-bottom: none; }
+
+        .listings .item .title {
+          display: block;
+          color: #39a1c4;
+          font-weight: 700;
+        }
+
+        .listings .item.active .title,
+        .listings .item .title:hover { color: #52eeff; }
+
+        .listings .item.active {
+          background-color: #f8f8f8;
+        }
+
+        ::-webkit-scrollbar {
+          width: 3px;
+          height: 3px;
+          border-left: 0;
+          background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-track {
+          background: none;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: #39a1c4;
+          border-radius: 0;
+        }
+
+        .clearfix { display: block; }
+
+        .clearfix::after {
+          content: '.';
+          display: block;
+          height: 0;
+          clear: both;
+          visibility: hidden;
+        }
+
+        /* Marker tweaks */
+        .mapboxgl-popup-close-button {
+          display: none;
+        }
+
+        .mapboxgl-popup-content {
+          font-weight: 400;
+          font :'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+          padding: 0;
+          width: 100%;
+          /* overflow-x: scroll; */
+        }
+
+        .mapboxgl-popup-content-wrapper {
+          padding: 1%;
+        }
+
+        .mapboxgl-popup-content h5 {
+          background: #39a1c4;
+          color: #fff;
+          margin: 0;
+          display: block;
+          padding: 3%;
+          border-radius: 3px 3px 0 0;
+          font-weight: 700;
+          margin-top: -15px;
+        }
+
+        .mapboxgl-popup-content h6 {
+          align-content: center;
+          margin: 0;
+          display: block;
+          padding: 3%;
+          font-weight: 400;
+        }
+
+        .mapboxgl-popup-content div {
+          padding: 10px;
+        }
+
+        .mapboxgl-container .leaflet-marker-icon {
+          cursor: pointer;
+        }
+
+        .mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
+          margin-top: 15px;
+        }
+
+        .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+          border-bottom-color: #39a1c4;
+        }
+
+        .btn{
+          margin-left: 25%;
+          margin-bottom: 2%
+        }
+
+    </style>
+  </head>
+  <body>
+    <!-- Code for the alert tag -->
+    <div class="alert alert-secondary alert-dismissible fade show" role="alert">
+      <strong>Find Affordable Housing companies and units below!</strong>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <!-- Map placement -->
+    <div id='map'></div>
+
+    <!-- Side listing -->
+    <div class='sidebar'>
+      <div class='heading'>
+        <h1>Affordable Houses</h1>
+      </div>
+      <div id='listings' class='listings'></div>
+    </div>
+
+    <!-- Start of JavaScript code -->
+    <script>
+      // This will let you use the .remove() function later on. Must be included at the beginning of the script
+      if (!('remove' in Element.prototype)) {
+        Element.prototype.remove = function() {
+          if (this.parentNode) {
+            this.parentNode.removeChild(this);
+          }
+        };
+      }
+      // Mapbox access code
+      mapboxgl.accessToken = 'pk.eyJ1Ijoia2lhbmExMzE3IiwiYSI6ImNqejFuYWE4cjBwNGEzaHFnMnQ0djVjZjIifQ.C5TFmb66BmrpOmp0ripTdA';
+
+      // Creating an instance of a map
+      var map = new mapboxgl.Map({
+        container: 'map', // HTML container id
+        style: 'mapbox://styles/mapbox/light-v10', // style URL
+        center: [-87.6298, 41.8619], // starting position as [lng, lat]
+        zoom: 9.4 // Initial zoom
+      });
+
+      // Naviagtion controls
+      map.addControl(new mapboxgl.NavigationControl());
+
+      // Inline GeoJson Data for housing units
+       var rental = {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Woodlawn",
+              "type": "Multifamily",
+              "name": "The Grant at Woodlawn Pk Phase I",
+              "address": "6227-29 S. Cottage Grove Ave.",
+              "zip": "60637",
+              "phone": "312-283-0030",
+              "comp": "Preservation Housing Management LLC",
+              "units": "67"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.605807,
+                41.781408
+              ],
+              "type": "Point"
+            },
+            "id": "01615628e9296c4a94701b6436ff8ec6"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near North Side",
+              "type": "Multifamily",
+              "name": "North Town Village II",
+              "address": "1311 N. Halsted St.",
+              "zip": "60642",
+              "phone": "312-944-9488",
+              "comp": "Holsten Real Estate Dev. Corp.",
+              "units": "112"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.647982,
+                41.905438
+              ],
+              "type": "Point"
+            },
+            "id": "01de95f0296020c0b3779500ec34a554"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Grand Boulevard",
+              "type": "Multifamily",
+              "name": "Shops & Lofts at 47",
+              "address": "747 E. 47th St.",
+              "zip": "60653",
+              "phone": "855-618-4959",
+              "comp": "The Community Builders Inc.",
+              "units": "72"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.607085,
+                41.809413
+              ],
+              "type": "Point"
+            },
+            "id": "01fefa38f7362806725d66951a3fb75c"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Lincoln Square",
+              "type": "ARO",
+              "name": "2247 W. Lawrence Ave.",
+              "address": "2247 W. Lawrence Ave.",
+              "zip": "60625",
+              "phone": "312-266-1515",
+              "comp": "CA Urban Living",
+              "units": "2"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.684575,
+                41.968404
+              ],
+              "type": "Point"
+            },
+            "id": "022c8aea023467e4cd914fb1c8260482"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Douglas",
+              "type": "Multifamily",
+              "name": "Park Boulevard IB",
+              "address": "3506 S. State St.",
+              "zip": "60609",
+              "phone": "773-548-8792",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "54"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.62679,
+                41.830782
+              ],
+              "type": "Point"
+            },
+            "id": "025f787b6b9d96d9e7dd31b99c209b39"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Douglas",
+              "type": "Multifamily",
+              "name": "Park Boulevard IIA",
+              "address": "17 W. 36th St.",
+              "zip": "60609",
+              "phone": "773-548-8792",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "36"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.627165,
+                41.829062
+              ],
+              "type": "Point"
+            },
+            "id": "02b391d1213ecab373babbcf5a6e109d"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Uptown",
+              "type": "Senior",
+              "name": "Ruth Shriman House",
+              "address": "4040 N. Sheridan Road",
+              "zip": "60613",
+              "phone": "773-665-2210",
+              "comp": "Interfaith Housing Corp.",
+              "units": "231"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.654725,
+                41.955685
+              ],
+              "type": "Point"
+            },
+            "id": "03340d6d6b43d298d3fa65163aa87c51"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Supportive/HIV/AIDS",
+              "name": "Hope House",
+              "address": "1251 S. Sawyer Ave.",
+              "zip": "60623",
+              "phone": "773-935-4663",
+              "comp": "AIDSCare, Inc.",
+              "units": "80"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.706693,
+                41.864829
+              ],
+              "type": "Point"
+            },
+            "id": "03de9738eba1185ecd2d01279adb335d"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Woodlawn",
+              "type": "Senior",
+              "name": "Butler Apts.",
+              "address": "6146 S. Kenwood Ave.",
+              "zip": "60637",
+              "phone": "773-955-9290",
+              "comp": "Woodlawn Comm. Dev. Corp.",
+              "units": "17"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.593261,
+                41.782803
+              ],
+              "type": "Point"
+            },
+            "id": "04dbabe97294fe42e6dc55df6032804f"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Grand Boulevard",
+              "type": "Multigfamily",
+              "name": "Cornerstone Apts.",
+              "address": "731 E. 50th Pl",
+              "zip": "60615",
+              "phone": "312-577-5555",
+              "comp": "The Community Builders Inc.",
+              "units": "24"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.607588,
+                41.803042
+              ],
+              "type": "Point"
+            },
+            "id": "05253c48a85ed9fcd5153e4149132cae"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Nelson Mandela Apts.",
+              "address": "3554 W. Ohio St.",
+              "zip": "60624",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apts.",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.715964,
+                41.891907
+              ],
+              "type": "Point"
+            },
+            "id": "0538a642a0551e9c9d6fdfeefd60883a"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Center",
+              "type": "ARO",
+              "name": "1911-21 W. Irving Park Rd.",
+              "address": "1911-21 W. Irving Park Rd.",
+              "zip": "60613",
+              "phone": "312-285-3749",
+              "comp": "Campell Street Asset Management Inc.",
+              "units": "2"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.676823,
+                41.954072
+              ],
+              "type": "Point"
+            },
+            "id": "057e939d5ef5c5b5421fe47907d9d22c"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Park Douglas",
+              "address": "2642-44 W. 12 th Pl",
+              "zip": "60608",
+              "phone": "773-893-4800",
+              "comp": "Interstate Realty Management Co.",
+              "units": "17"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.692741,
+                41.865771
+              ],
+              "type": "Point"
+            },
+            "id": "05b6fa1f2cb4b828546b6280ae365983"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Supportive Housing",
+              "name": "Independence Apts.",
+              "address": "927 S. Indepenednece Blvd.",
+              "zip": "60624",
+              "phone": "773-549-8300",
+              "comp": "Realty & Mortgage Co.",
+              "units": "58"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.718717,
+                41.869099
+              ],
+              "type": "Point"
+            },
+            "id": "067c020bed1a0644016260e8ee51ab81"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Grand Boulevard",
+              "type": "Multifamily",
+              "name": "Hearts United II-The Quincy (scattered sites)",
+              "address": "701-27 E. 43rd St.",
+              "zip": "60653",
+              "phone": "773-924-2100",
+              "comp": "Bonheur Realty Services Corp.",
+              "units": "81"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.609059,
+                41.816666
+              ],
+              "type": "Point"
+            },
+            "id": "07271fee0490be526c7b63fbe2c8b797"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "West Pullman",
+              "type": "Senior",
+              "name": "All Saints Senior Residence",
+              "address": "11701 S. State St.",
+              "zip": "60628",
+              "phone": "312-655-7440",
+              "comp": "Catholic Charities Housing Devp.",
+              "units": "42"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.622627,
+                41.68159
+              ],
+              "type": "Point"
+            },
+            "id": "0751a56fb99dbf435f6c781442759200"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Park Doulglas",
+              "address": "1345 S. Fairfield Ave.",
+              "zip": "60608",
+              "phone": "773-893-4800",
+              "comp": "Interstate Realty Management Co.",
+              "units": "17"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.694401,
+                41.863398
+              ],
+              "type": "Point"
+            },
+            "id": "07dc59cd198c45ed305e19dc83564cdd"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Kenwood",
+              "type": "Multifamily",
+              "name": "Drexel Preservation",
+              "address": "837 E. 47th St.",
+              "zip": "60653",
+              "phone": "773-624-4901",
+              "comp": "MLG Management",
+              "units": "39"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.605033,
+                41.80944
+              ],
+              "type": "Point"
+            },
+            "id": "0922a96e6bad0b85c4cb2a7344d64b52"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Lakeview",
+              "type": "Senior LGBTQ",
+              "name": "Town Hall Apts.",
+              "address": "3600 N. Halsted St.",
+              "zip": "60613",
+              "phone": "773-472-6463",
+              "comp": "Heartland Houing Inc.",
+              "units": "79"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.649636,
+                41.947401
+              ],
+              "type": "Point"
+            },
+            "id": "0a6e712eb9f8dc1b5560036ba9a1e2e5"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Oakland",
+              "type": "Multifamily",
+              "name": "Lake Park Crescent",
+              "address": "1061 E. 41st Place",
+              "zip": "60653",
+              "phone": "773-268-0200",
+              "comp": "Draper and Kramer, Inc.",
+              "units": "32"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.599925,
+                41.819781
+              ],
+              "type": "Point"
+            },
+            "id": "0b58a980827705d357e3c89c2f03553b"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Oakland",
+              "type": "Multifamily",
+              "name": "Lakefront Phase II",
+              "address": "1060 E. 41st St.",
+              "zip": "60653",
+              "phone": "773-548-8795",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "81"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.600436,
+                41.820357
+              ],
+              "type": "Point"
+            },
+            "id": "0bcd4a00af5b314d4efd1a9903da38fd"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Park",
+              "type": "Senior",
+              "name": "Edward M. Marx Apts.",
+              "address": "5801 N. Pulaski Road",
+              "zip": "60646",
+              "phone": "773-583-4182",
+              "comp": "Elderly Housing Devp. & Operations Corp.",
+              "units": "180"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.728369,
+                41.985931
+              ],
+              "type": "Point"
+            },
+            "id": "0d8675673b41aa308e14f43851624246"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near North Side",
+              "type": "ARO",
+              "name": "Atrium at Old Town Park",
+              "address": "300 W. Hill St.",
+              "zip": "60610",
+              "phone": "312-642-8707",
+              "comp": "Omni Group",
+              "units": "41"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.63592,
+                41.902195
+              ],
+              "type": "Point"
+            },
+            "id": "0df49bf77835a3ff60ae5447fd5a095e"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Madres Unidas (scattered sites)",
+              "address": "3541 W. North Ave.",
+              "zip": "60647",
+              "phone": "773-276-5338 ext. 225",
+              "comp": "LUCHA",
+              "units": "80"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.716052,
+                41.909892
+              ],
+              "type": "Point"
+            },
+            "id": "0e14865f68e3f763c2094034c57166b5"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "ARO",
+              "name": "2211 N. Milwaukee Ave.",
+              "address": "2201-31 N. Milwaukee Ave.",
+              "zip": "60647",
+              "phone": "773-327-4975",
+              "comp": "33 Management LLC",
+              "units": "12"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.693854,
+                41.920903
+              ],
+              "type": "Point"
+            },
+            "id": "0e95469f528099f0db5dbc3ad00f5f8b"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Albany Park",
+              "type": "Senior",
+              "name": "Darul Amaan Senior Living",
+              "address": "4814-58 N. Kedzie Ave.",
+              "zip": "60625",
+              "phone": "773-463-3004",
+              "comp": "East Lake Management & Development Corp.",
+              "units": "56"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.708637,
+                41.968935
+              ],
+              "type": "Point"
+            },
+            "id": "10196992232a61f05cb8f3d86b3986b9"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Dicksons Estates Apts.",
+              "address": "1129 S. Sacramento Ave.",
+              "zip": "60612",
+              "phone": "773-638-0386",
+              "comp": "Dickson Estates Apartments",
+              "units": "42"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.700666,
+                41.867369
+              ],
+              "type": "Point"
+            },
+            "id": "103ee393f418e74e20813705e44fbd68"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "New City",
+              "type": "Senior",
+              "name": "West Haven Homes",
+              "address": "850 W. Garfield Blvd.",
+              "zip": "60609",
+              "phone": "773-536-3057",
+              "comp": "Universal Management Service, Inc.",
+              "units": "110"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.647244,
+                41.794393
+              ],
+              "type": "Point"
+            },
+            "id": "105efcc9a7b0ab7063def032c69459a6"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Uptown",
+              "type": "Multifamily",
+              "name": "Uptown Preservation Apts.",
+              "address": "900 W. Windsor Ave.",
+              "zip": "60640",
+              "phone": "773-286-5400",
+              "comp": "Leasing & Management Co. Inc.",
+              "units": "160"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.652505,
+                41.964592
+              ],
+              "type": "Point"
+            },
+            "id": "1067e783f0ae5d424b7af09dc70f58af"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Woodlawn",
+              "type": "Multifamily",
+              "name": "65th Street Apts.",
+              "address": "817 E. 64th St.",
+              "zip": "60637",
+              "phone": "773-684-2056",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.605072,
+                41.778493
+              ],
+              "type": "Point"
+            },
+            "id": "10ed33134cae67e70bf5cd9460d5f298"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Washington Park",
+              "type": "Senior",
+              "name": "St. Edmund's Tower Annex",
+              "address": "6151 S. Michigan Ave.",
+              "zip": "60637",
+              "phone": "773-493-2411",
+              "comp": "St. Edmund's Redevelopment Corp.",
+              "units": "34"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.621987,
+                41.782332
+              ],
+              "type": "Point"
+            },
+            "id": "116ba49679f653434b739db78e781201"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Nelson Mandela Apts.",
+              "address": "3114 W. Franklin Blvd.",
+              "zip": "60624",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apts.",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.704586,
+                41.890201
+              ],
+              "type": "Point"
+            },
+            "id": "11ed8e491ef2352f291e0655ead24df8"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Lower West Side",
+              "type": "Multifamily",
+              "name": "Casa Monterrey",
+              "address": "967 W. 19th St.",
+              "zip": "60608",
+              "phone": "312-666-1323",
+              "comp": "The Resurrection Project",
+              "units": "4"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.650746,
+                41.856567
+              ],
+              "type": "Point"
+            },
+            "id": "122d21275d34f0ec9faca503adbdaaf4"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "Multifamily",
+              "name": "Tierra Linda Apts.",
+              "address": "1802 N. Sawyer Ave.",
+              "zip": "60647",
+              "phone": "773-276-5338",
+              "comp": "LUCHA",
+              "units": "3"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.709333,
+                41.913915
+              ],
+              "type": "Point"
+            },
+            "id": "1284583d0eaf95782394665fb1139ce9"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near North Side",
+              "type": "Multifamily",
+              "name": "Parkside of Old Town IIB",
+              "address": "459 W. Division St.",
+              "zip": "60622",
+              "phone": "312=944-8500",
+              "comp": "Holsten Real Estate Dev. Corp.",
+              "units": "94"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.640463,
+                41.903648
+              ],
+              "type": "Point"
+            },
+            "id": "12e2ab537830c903e2c36acfe08aa5ad"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Lower West Side",
+              "type": "Multifamily",
+              "name": "Casa Tabasco",
+              "address": "2014 S. Racine Ave.",
+              "zip": "60608",
+              "phone": "312-850-1935",
+              "comp": "The Resurrection Project",
+              "units": "45"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.656478,
+                41.85469
+              ],
+              "type": "Point"
+            },
+            "id": "13676f1e0b6ea6525cd6487dac182852"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Chicago Lawn",
+              "type": "Senior",
+              "name": "Lawn Terrace Apts.",
+              "address": "3214 W. 63rd Pl",
+              "zip": "60629",
+              "phone": "773-925-2815",
+              "comp": "Greater Southwest Dev. Corp.",
+              "units": "102"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.703875,
+                41.778144
+              ],
+              "type": "Point"
+            },
+            "id": "138f7defe74a5f116263e36b9ee1051b"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Auburn Gresham",
+              "type": "Senior",
+              "name": "Auburn Commons",
+              "address": "1626 W. 87th St.",
+              "zip": "60620",
+              "phone": "773-238-0850",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "72"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.664142,
+                41.735885
+              ],
+              "type": "Point"
+            },
+            "id": "13aa99090190cb687c9a704c4c9fc46d"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Douglas",
+              "type": "Multifamily",
+              "name": "Park Boulevard IIB",
+              "address": "3700 S. Dearborn St.",
+              "zip": "60609",
+              "phone": "773-548-8792",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "72"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.627843,
+                41.827194
+              ],
+              "type": "Point"
+            },
+            "id": "140a2d4135c2b6765aed5edcd4fd0a3c"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Senior",
+              "name": "Tabernacle Apts.",
+              "address": "3836 W. Cermak Road",
+              "zip": "60623",
+              "phone": "773-762-3389",
+              "comp": "Lawndale Christian Residential Svcs.",
+              "units": "126"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.721326,
+                41.851702
+              ],
+              "type": "Point"
+            },
+            "id": "149badc0693257b6a6ca4ad1c119685e"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Dr. King Apts.",
+              "address": "1550 S. Hamlin Ave.",
+              "zip": "60623",
+              "phone": "773-776-7233",
+              "comp": "Lawndale Christian Residential Svcs.",
+              "units": "45"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.72024,
+                41.859235
+              ],
+              "type": "Point"
+            },
+            "id": "15d69ee0768b66ea171541201a42cfce"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Rosa Parks Apts.",
+              "address": "532 N. Trumbull Ave.",
+              "zip": "60624",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apts.",
+              "units": "15"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.712675,
+                41.891235
+              ],
+              "type": "Point"
+            },
+            "id": "164b4a89a30a66e2fce81cbc19388b76"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Lakeview",
+              "type": "ARO",
+              "name": "The Bel",
+              "address": "941 W. Belmont Ave.",
+              "zip": "60657",
+              "phone": "773-327-6146",
+              "comp": "33 Realty",
+              "units": "4"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.653151,
+                41.939638
+              ],
+              "type": "Point"
+            },
+            "id": "16ad4c69d237489c88de1ea6de8f42f8"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Austin",
+              "type": "Multifamily",
+              "name": "Pine Central",
+              "address": "557 N. Pine Ave.",
+              "zip": "60644",
+              "phone": "773-568-1020",
+              "comp": "NHS Redevelopment Corp.",
+              "units": "78"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.763248,
+                41.890519
+              ],
+              "type": "Point"
+            },
+            "id": "188967836008682d37a48c85caccff9b"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Bloomingdale Apts.",
+              "address": "1745 N. Keystone Ave.",
+              "zip": "60639",
+              "phone": "773-276-2965",
+              "comp": "Village Green Management Co.",
+              "units": "48"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.727503,
+                41.91299
+              ],
+              "type": "Point"
+            },
+            "id": "18d0efd445ee2ee1176d378a7897fefc"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Douglas",
+              "type": "Multifamily",
+              "name": "Park Boulevard IIA",
+              "address": "3612 S. State St.",
+              "zip": "60609",
+              "phone": "773-548-8792",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.626655,
+                41.828736
+              ],
+              "type": "Point"
+            },
+            "id": "1a111f98d5502f4f69e7aa7278319034"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "East Garfield Park",
+              "type": "Multifamily",
+              "name": "Ike Sims Village",
+              "address": "3333 W. Maypole Ave.",
+              "zip": "60624",
+              "phone": "773-638-1818",
+              "comp": "Village Green Management Co.",
+              "units": "200"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.710039,
+                41.883465
+              ],
+              "type": "Point"
+            },
+            "id": "1af9de661697e3b773f42419282318d2"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "West Town",
+              "type": "Multifamily",
+              "name": "Tierra Linda Apts.",
+              "address": "1421 N. Artesian Ave.",
+              "zip": "60622",
+              "phone": "773-276-5338",
+              "comp": "LUCHA",
+              "units": "3"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.688214,
+                41.90703
+              ],
+              "type": "Point"
+            },
+            "id": "1bc505dcd76641d5df6bbef275374b60"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Oakland",
+              "type": "Multifamily",
+              "name": "Lakefront Phase II",
+              "address": "1106 E. 42nd Pl",
+              "zip": "60653",
+              "phone": "773-548-8795",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "3"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.599362,
+                41.818139
+              ],
+              "type": "Point"
+            },
+            "id": "1c3d2d772928dcad57869eb2c8938543"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Oakland",
+              "type": "Multifamily",
+              "name": "Oakwood Shrs 1A, 1B, 2A, 2B1 (scattered sites)",
+              "address": "3859 S. Vincennes Ave.",
+              "zip": "60653",
+              "phone": "773-373-1300",
+              "comp": "The Community Builders",
+              "units": "534"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.612468,
+                41.823919
+              ],
+              "type": "Point"
+            },
+            "id": "1d876b0e1e07be3b9f3b473dbc695518"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "Multifamily",
+              "name": "Rev. Daniel Alvarez Apts.",
+              "address": "2451-57 N. Sacramento Ave.",
+              "zip": "60612",
+              "phone": "773-772-4063",
+              "comp": "Hispanic Housing Dev. Corp.",
+              "units": "96"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.702209,
+                41.926278
+              ],
+              "type": "Point"
+            },
+            "id": "1fc90bcf1916a748f4f997b4b8175050"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near North Side",
+              "type": "Multifamily",
+              "name": "Clybourn 1200",
+              "address": "1200 N. Clybourn Ave.",
+              "zip": "60622",
+              "phone": "312-477-7442",
+              "comp": "Interstate Realty Management Co.",
+              "units": "52"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.63982,
+                41.903789
+              ],
+              "type": "Point"
+            },
+            "id": "205e2798ad60f403e0d93532169491b6"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near West Side",
+              "type": "Multifamily",
+              "name": "City Gardens",
+              "address": "320 S. Maplewood Ave.",
+              "zip": "60612",
+              "phone": "844-842-2779",
+              "comp": "Interstate Realty Management Co.",
+              "units": "76"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.690222,
+                41.876981
+              ],
+              "type": "Point"
+            },
+            "id": "208316cc4be9fd75b5596b8b642d1430"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "South Shore",
+              "type": "Senior",
+              "name": "Senior Suites of Rainbow Beach",
+              "address": "2804 E. 77th Place",
+              "zip": "60649",
+              "phone": "773-374-5333",
+              "comp": "Senior Lifestyle Corp.",
+              "units": "87"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.554964,
+                41.754686
+              ],
+              "type": "Point"
+            },
+            "id": "2137d961dbe38fe22f5351e4ee449c16"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Oakland",
+              "type": "Multifamily",
+              "name": "Lakefront Phase II",
+              "address": "1113 E. Bowen Ave.",
+              "zip": "60653",
+              "phone": "773-548-8795",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.599383,
+                41.818579
+              ],
+              "type": "Point"
+            },
+            "id": "216f8e65e11dcd8471f8051b0c750524"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near West Side",
+              "type": "Multifamily",
+              "name": "Westhaven Park Phase IIB",
+              "address": "110 N. Wood St.",
+              "zip": "60612",
+              "phone": "312-491-1114",
+              "comp": "Interstate Realty Management Co.",
+              "units": "176"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.671953,
+                41.883554
+              ],
+              "type": "Point"
+            },
+            "id": "2195ca41b8a9816c3ff0dcd7ed7898d0"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Nelson Mandela Apts.",
+              "address": "505 N. Troy St.",
+              "zip": "60612",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apts.",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.705025,
+                41.890522
+              ],
+              "type": "Point"
+            },
+            "id": "22073f211b9d02833fa211c7e0b768be"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Oakland",
+              "type": "Multifamily",
+              "name": "Lakefront Phase II",
+              "address": "4116 S. Oakenwald Ave.",
+              "zip": "60653",
+              "phone": "773-548-8795",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "3"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.59929,
+                41.819572
+              ],
+              "type": "Point"
+            },
+            "id": "23fad0548964f4c6092a0163da32122d"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "West Ridge",
+              "type": "ARO",
+              "name": "5822 North Western, LLC",
+              "address": "5822 N. Western Ave.",
+              "zip": "60659",
+              "phone": "773-572-2755",
+              "comp": "Chicago Apartment Finders",
+              "units": "2"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.689718,
+                41.987522
+              ],
+              "type": "Point"
+            },
+            "id": "241760f6349b8914b48d6d4afe68a51f"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "West Garfield Park",
+              "type": "Senior",
+              "name": "Midwest Apts.",
+              "address": "6 N. Hamlin Blvd.",
+              "zip": "60624",
+              "phone": "773-265-0323",
+              "comp": "Holsten Management Corp.",
+              "units": "276"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.720906,
+                41.880967
+              ],
+              "type": "Point"
+            },
+            "id": "25088177462c80ca5410a6631c0db84f"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Grand Boulevard",
+              "type": "Multifamily",
+              "name": "Legends South - Mahalia Place",
+              "address": "116 E. 43rd St.",
+              "zip": "60653",
+              "phone": "773-285-9500",
+              "comp": "Interstate Realty Management Co.",
+              "units": "110"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.622264,
+                41.816662
+              ],
+              "type": "Point"
+            },
+            "id": "265cfecc7012ce5351732ca11bc696b4"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "Multifamily",
+              "name": "Tierra Linda Apts.",
+              "address": "1812 N. Drake Ave.",
+              "zip": "60647",
+              "phone": "773-276-5338",
+              "comp": "LUCHA",
+              "units": "3"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.715509,
+                41.914101
+              ],
+              "type": "Point"
+            },
+            "id": "268ca0d6bc4f0c3d0af48c447380c7cf"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "ARO",
+              "name": "2400 Cortland",
+              "address": "2404-14 W. Cortland St.",
+              "zip": "60647",
+              "phone": "312-489-1600",
+              "comp": "Laramar Group",
+              "units": "2"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.687634,
+                41.915869
+              ],
+              "type": "Point"
+            },
+            "id": "2754ac487446d82b7435fc5d44a1e6f3"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Lakeview",
+              "type": "Senior",
+              "name": "Renaissance St. Luke Greenview Place",
+              "address": "1501 W. Melrose St.",
+              "zip": "60657",
+              "phone": "773-525-1501",
+              "comp": "RRG Development, Inc.",
+              "units": "155"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.666382,
+                41.940531
+              ],
+              "type": "Point"
+            },
+            "id": "275a1c35dae228b1e20764368471b3da"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "South Shore",
+              "type": "Senior",
+              "name": "Rainbow's End",
+              "address": "7538 S. Kingston Ave.",
+              "zip": "60649",
+              "phone": "773-768-5402",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "84"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.562859,
+                41.757871
+              ],
+              "type": "Point"
+            },
+            "id": "27640842c90e112c3fcc6952f2d1355d"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Uptown",
+              "type": "Multifamily",
+              "name": "Sunnyside Kenmore Apts.",
+              "address": "847-49 W. Sunnyside Ave.",
+              "zip": "60640",
+              "phone": "773-769-3116",
+              "comp": "Metroplex, Inc.",
+              "units": "83"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.651796,
+                41.963535
+              ],
+              "type": "Point"
+            },
+            "id": "27f0f292d056c939446a77c3365aace8"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "Multifamily",
+              "name": "Zapata Apts.",
+              "address": "3230 W. Armitage Ave",
+              "zip": "60647",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apartments",
+              "units": "100"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.708265,
+                41.917494
+              ],
+              "type": "Point"
+            },
+            "id": "2821724b7252087986306f32bac4eb43"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Lakeview",
+              "type": "ARO",
+              "name": "3220 Lincoln",
+              "address": "3220 N. Lincoln Ave.",
+              "zip": "60657",
+              "phone": "312-214-3563",
+              "comp": "3220 Lincoln LLC",
+              "units": "2"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.669424,
+                41.94023
+              ],
+              "type": "Point"
+            },
+            "id": "2860abf985019692eb867acfde2232d6"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "West Town",
+              "type": "ARO",
+              "name": "Centrum Wicker Park",
+              "address": "1664 W. Division St.",
+              "zip": "60622",
+              "phone": "312-368-3000",
+              "comp": "Centrum Partners",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.669971,
+                41.903415
+              ],
+              "type": "Point"
+            },
+            "id": "29741457f65f8ff26983ff740fcc321d"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "65+/Supportive",
+              "name": "Montclare Sr. Residences SLF of Lawndale",
+              "address": "4339-47 W. 18th Pl",
+              "zip": "60623",
+              "phone": "773-277-0288",
+              "comp": "Montclare Supportive Living",
+              "units": "120"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.733887,
+                41.855771
+              ],
+              "type": "Point"
+            },
+            "id": "29a3ff29d37668e668aee26d7a785ed7"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "South Lawndale",
+              "type": "Multifamily",
+              "name": "Casa Tabasco",
+              "address": "3515-17 W. 23rd St.",
+              "zip": "60623",
+              "phone": "312-248-8355",
+              "comp": "The Resurrection Project",
+              "units": "8"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.713204,
+                41.849756
+              ],
+              "type": "Point"
+            },
+            "id": "29e9955efba5d40a5230995f97bf8d84"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Nelson Mandela Apts.",
+              "address": "3224 W. Ohio St.",
+              "zip": "60624",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apts.",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.707607,
+                41.891993
+              ],
+              "type": "Point"
+            },
+            "id": "2a14372c082a26619e21ee9b459aae35"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Woodlawn",
+              "type": "Multifamily",
+              "name": "WECAN",
+              "address": "6450 S. Stony Island Ave.",
+              "zip": "60637",
+              "phone": "773-288-3000",
+              "comp": "WECAN",
+              "units": "117"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.586493,
+                41.777286
+              ],
+              "type": "Point"
+            },
+            "id": "2a4a4e5348f8448091579586323bfb33"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "ARO",
+              "name": "2501 Armitage",
+              "address": "2501 W. Armitage Ave.",
+              "zip": "60647",
+              "phone": "312-255-1153",
+              "comp": "Tandem Property Management",
+              "units": "8"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.689883,
+                41.917443
+              ],
+              "type": "Point"
+            },
+            "id": "2b2728f44b60fdb248b56004e639892f"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Uptown",
+              "type": "ARO",
+              "name": "4801 N. Ravenswood Ave.",
+              "address": "4801 N. Ravenswood Ave.",
+              "zip": "60640",
+              "phone": "773-929-7050",
+              "comp": "Hayes Properties Inc.",
+              "units": "4"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.67403,
+                41.968973
+              ],
+              "type": "Point"
+            },
+            "id": "2b76a5c5f9b7506ab529caf68f73dfc7"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Senior",
+              "name": "North & Pulaski Senior Housing",
+              "address": "3939-59 W. North Ave.",
+              "zip": "60647",
+              "phone": "773-687-0234",
+              "comp": "Hispanic Housing Dev. Corp.",
+              "units": "72"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.725581,
+                41.909787
+              ],
+              "type": "Point"
+            },
+            "id": "2b8b0d7967a0a2b0cca0dbd404249667"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Park Douglas",
+              "address": "1317-19 S. Fairfield Ave.",
+              "zip": "60608",
+              "phone": "773-893-4800",
+              "comp": "Interstate Realty Management Co.",
+              "units": "29"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.694424,
+                41.864124
+              ],
+              "type": "Point"
+            },
+            "id": "2dbfb026c95482685dc7da4c288232c3"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Nelson Mandela Apts.",
+              "address": "614 N. Spaulding Ave.",
+              "zip": "60624",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apts.",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.709048,
+                41.89237
+              ],
+              "type": "Point"
+            },
+            "id": "303f5926eaea4bcc15a2c68b15795175"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Washington Park",
+              "type": "Multifamily",
+              "name": "St. Edmund's Manor",
+              "address": "5947 S. Indiana Ave.",
+              "zip": "60653",
+              "phone": "773-548-8924",
+              "comp": "St. Edmund's Manor Ltd.",
+              "units": "24"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.620475,
+                41.786049
+              ],
+              "type": "Point"
+            },
+            "id": "3069dd780e6870166b5333789a17d9eb"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Park Douglas",
+              "address": "1224 S. Washtenaw Ave.",
+              "zip": "60608",
+              "phone": "773-893-4800",
+              "comp": "Interstate Realty Management Co.",
+              "units": "31"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.693533,
+                41.865681
+              ],
+              "type": "Point"
+            },
+            "id": "31cbcd9a22cedd2a1761f346c9e69848"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "West Town",
+              "type": "ARO",
+              "name": "1611 West Division",
+              "address": "1611 W. Division St.",
+              "zip": "60622",
+              "phone": "773-661-5500",
+              "comp": "M. Fishman & Co.",
+              "units": "10"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.667978,
+                41.90323
+              ],
+              "type": "Point"
+            },
+            "id": "327a4b8c52268c3acbbc8498e5d635ab"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Avondale",
+              "type": "ARO",
+              "name": "The Field's Lofts",
+              "address": "4000 W. Diversey Ave.",
+              "zip": "60639",
+              "phone": "773-327-6146",
+              "comp": "33 Realty",
+              "units": "12"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.729468,
+                41.932302
+              ],
+              "type": "Point"
+            },
+            "id": "3315931193c96f68faec80d1843554fd"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Portage Park",
+              "type": "Senior",
+              "name": "The Kilpatrick Renaissance",
+              "address": "4655 W. Burteau Ave.",
+              "zip": "60641",
+              "phone": "773-283-4655",
+              "comp": "The Renaissance Cos.",
+              "units": "98"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.745235,
+                41.956396
+              ],
+              "type": "Point"
+            },
+            "id": "3360a8c7b84935c21a3ae3ec3ce8d4ce"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Uptown",
+              "type": "Senior",
+              "name": "Wilson Yard Senior Apts.",
+              "address": "1032 W. Montrose Ave",
+              "zip": "60613",
+              "phone": "866-227-0438",
+              "comp": "Holsten Real Estate Dev. Corp.",
+              "units": "13"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.656107,
+                41.961865
+              ],
+              "type": "Point"
+            },
+            "id": "3415420dbe8b8a44fca275d229fbcb47"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Woodlawn",
+              "type": "Multifamily",
+              "name": "The Grant at Woodlawn Pk Phase II",
+              "address": "6129 S. Cottage Grove Ave.",
+              "zip": "60637",
+              "phone": "312-283-0030",
+              "comp": "Preservation Housing Management LLC",
+              "units": "33"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.605843,
+                41.783175
+              ],
+              "type": "Point"
+            },
+            "id": "349c3b71fb91db980f83ca34fa1deb51"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Roseland",
+              "type": "Supportive Housing",
+              "name": "Holland Apartments",
+              "address": "240 W. 107th Place",
+              "zip": "60628",
+              "phone": "773-568-3031",
+              "comp": "Mercy Housing",
+              "units": "40"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.629543,
+                41.698995
+              ],
+              "type": "Point"
+            },
+            "id": "360edba0c314368e70422776bbca52e4"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "South Shore",
+              "type": "Multifamily",
+              "name": "Highlands Tudor Manor",
+              "address": "7018 S. Cregier Ave.",
+              "zip": "60649",
+              "phone": "773-667-1940",
+              "comp": "Related Management Co. LP",
+              "units": "18"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.581405,
+                41.767382
+              ],
+              "type": "Point"
+            },
+            "id": "36bfeef3a3bcd6072c4e276daf233914"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "South Lawndale",
+              "type": "Multifamily",
+              "name": "Resurrection Homes",
+              "address": "2243 S. Central Park Ave.",
+              "zip": "60623",
+              "phone": "312-248-8355",
+              "comp": "The Resurrection Project",
+              "units": "2"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.714813,
+                41.850391
+              ],
+              "type": "Point"
+            },
+            "id": "37197702ed48eab822f6d80e0e061617"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Washington Park",
+              "type": "Multifamily",
+              "name": "St. Edmund's Oasis",
+              "address": "300-10 E. 61st St.",
+              "zip": "60637",
+              "phone": "773-493-2411",
+              "comp": "St. Edmund's Redevelopment Corp.",
+              "units": "12"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.618866,
+                41.783938
+              ],
+              "type": "Point"
+            },
+            "id": "37845233193cb55e393487bdbf7796a5"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Grand Boulevard",
+              "type": "Multifamily",
+              "name": "Progressive Square",
+              "address": "4752 S. Wabash Ave.",
+              "zip": "60614",
+              "phone": "773-975-7234",
+              "comp": "CMHDC/Progressive NFP/Kass Management",
+              "units": "107"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.624559,
+                41.807699
+              ],
+              "type": "Point"
+            },
+            "id": "38697b6665b754de03bc56b905e65278"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Tierra Linda Apts.",
+              "address": "1757 N. Drake Ave.",
+              "zip": "60647",
+              "phone": "773-276-5338",
+              "comp": "LUCHA",
+              "units": "3"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.714597,
+                41.913487
+              ],
+              "type": "Point"
+            },
+            "id": "389c0c9c171df4990d9a5caedc7aff8c"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "West Town",
+              "type": "Multifamily",
+              "name": "Paseo Boricua Apts.",
+              "address": "1154 N. Campbell St.",
+              "zip": "60622",
+              "phone": "312-602-6500",
+              "comp": "Hispanic Housing Dev. Corp.",
+              "units": "61"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.689632,
+                41.902878
+              ],
+              "type": "Point"
+            },
+            "id": "38b6c859f1c938ce29835feb744d644e"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Nelson Mandela Apts.",
+              "address": "607 N. Sawyer Ave.",
+              "zip": "60624",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apts.",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.707526,
+                41.892153
+              ],
+              "type": "Point"
+            },
+            "id": "38f1f9c6037eb70d13a27a34a1d83bda"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Edgewater",
+              "type": "Senior",
+              "name": "Hollywood House Apts.",
+              "address": "5700 N. Sheridan Road",
+              "zip": "60660",
+              "phone": "773-728-2600",
+              "comp": "Heartland Housing",
+              "units": "93"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.655388,
+                41.985641
+              ],
+              "type": "Point"
+            },
+            "id": "38ffedfcf532e2d2adfce51b8163d139"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Praise Apts.",
+              "address": "1859 S. Pulaski Road",
+              "zip": "60623",
+              "phone": "773-762-3389",
+              "comp": "Lawndale Christian Residential Svcs.",
+              "units": "11"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.72471,
+                41.855339
+              ],
+              "type": "Point"
+            },
+            "id": "3979724deb9f283b421bd31427cfb9c4"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Park Douglas",
+              "address": "1310-14 S. Washtenaw Ave.",
+              "zip": "60608",
+              "phone": "773-893-4800",
+              "comp": "Interstate Realty Management Co.",
+              "units": "10"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.693495,
+                41.864336
+              ],
+              "type": "Point"
+            },
+            "id": "3a811cf700e5a04348e1038d43a458ef"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Woodlawn",
+              "type": "Multifamily",
+              "name": "Renaissance Apts.",
+              "address": "6200 S. University Ave.",
+              "zip": "60637",
+              "phone": "773-752-9400",
+              "comp": "AIMCO",
+              "units": "64"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.598015,
+                41.782231
+              ],
+              "type": "Point"
+            },
+            "id": "3a8b246857d514215f7e3eb10eba5984"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "East Garfield Park",
+              "type": "Senior",
+              "name": "Heritage Woods of Chicago",
+              "address": "2800 W. Fulton St.",
+              "zip": "60612",
+              "phone": "773-722-2900",
+              "comp": "BMA Management Ltd.",
+              "units": "113"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.696558,
+                41.886646
+              ],
+              "type": "Point"
+            },
+            "id": "3a917103103c482471dc4e9ab75e91c6"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Park Douglas",
+              "address": "1255 S. Fairfield Ave.",
+              "zip": "60608",
+              "phone": "773-893-4800",
+              "comp": "Interstate Realty Management Co.",
+              "units": "5"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.694447,
+                41.86489
+              ],
+              "type": "Point"
+            },
+            "id": "3cb26061dbc7477602b93fd8c82c9838"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Uptown",
+              "type": "ARO",
+              "name": "The Synagogue",
+              "address": "5029 N. Kenmore Ave.",
+              "zip": "60640",
+              "phone": "855-443-5287",
+              "comp": "FLATS Leasing",
+              "units": "4"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.655939,
+                41.974122
+              ],
+              "type": "Point"
+            },
+            "id": "3dacc280f6e152ee736f5afe7e6bd7ce"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Edgewater",
+              "type": "Multifamily",
+              "name": "Bell Shore Apts.",
+              "address": "1062 W. Bryn Mawr Ave.",
+              "zip": "60660",
+              "phone": "773-334-5407",
+              "comp": "Holsten Management Corp.",
+              "units": "105"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.657703,
+                41.983772
+              ],
+              "type": "Point"
+            },
+            "id": "3dcecf82e5002f0a46f89c8a53ced17b"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near South Side",
+              "type": "Senior",
+              "name": "G&A Senior Residences at Eastgate Village",
+              "address": "300 E. 26th Street",
+              "zip": "60616",
+              "phone": "773-381-7400",
+              "comp": "Eastgate Village Partners LP",
+              "units": "127"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.620403,
+                41.845795
+              ],
+              "type": "Point"
+            },
+            "id": "3e0dfb6e011bf67ef40f67d381491c73"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Lower West Side",
+              "type": "Multifamily",
+              "name": "Casa Chiapas",
+              "address": "1712 W. 17th St.",
+              "zip": "60608",
+              "phone": "312-666-1323",
+              "comp": "The Resurrection Project",
+              "units": "72"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.669382,
+                41.858768
+              ],
+              "type": "Point"
+            },
+            "id": "3e43b81099e3bb66401d42ad82dd29b0"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "New City",
+              "type": "Senior",
+              "name": "New City Supportive Living",
+              "address": "4707 S. Marshfield Ave.",
+              "zip": "60609",
+              "phone": "773-376-1223",
+              "comp": "BMA Management Ltd.",
+              "units": "101"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.666033,
+                41.808364
+              ],
+              "type": "Point"
+            },
+            "id": "3eb7304d462deb376a2340af224d1ebe"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Loop",
+              "type": "Multifamily",
+              "name": "Randolph Tower City Apts. (studios only)",
+              "address": "188 W. Randolph St.",
+              "zip": "60601",
+              "phone": "312-291-8679",
+              "comp": "Village Green Management Co.",
+              "units": "16"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.633756,
+                41.884579
+              ],
+              "type": "Point"
+            },
+            "id": "3ef3f1cc6935e10dd04bafe9d442bd54"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Humboldt Park",
+              "type": "Multifamily",
+              "name": "Rosa Parks Apts.",
+              "address": "3215 W. Huron St.",
+              "zip": "60624",
+              "phone": "773-227-6332",
+              "comp": "Bickerdike Apts.",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.707201,
+                41.893608
+              ],
+              "type": "Point"
+            },
+            "id": "42598d1cda02d4924e44799fb5d050a1"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near West Side",
+              "type": "ARO",
+              "name": "171 N. Aberdeen St.",
+              "address": "171 N. Aberdeen St.",
+              "zip": "60607",
+              "phone": "773-675-0244",
+              "comp": "Medici Living",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.654305,
+                41.884919
+              ],
+              "type": "Point"
+            },
+            "id": "42f44d623da0fcfe0346571be5b91934"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Bridgeport",
+              "type": "Senior",
+              "name": "Senior Suites of Bridgeport",
+              "address": "2825 S. Halsted St.",
+              "zip": "60608",
+              "phone": "312-326-0333",
+              "comp": "Senior Lifestyle Corp.",
+              "units": "85"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.646247,
+                41.842729
+              ],
+              "type": "Point"
+            },
+            "id": "43025193f7c8c78600f7d7671e52f7b5"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "West Town",
+              "type": "Multifamily",
+              "name": "Boulevard Court Family Housing",
+              "address": "1723-33 N. Humboldt Blvd.",
+              "zip": "60647",
+              "phone": "773-486-7410",
+              "comp": "Hispanic Housing Dev. Corp.",
+              "units": "52"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.7018,
+                41.912808
+              ],
+              "type": "Point"
+            },
+            "id": "43089196f8099f6459b062eac041d799"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Near West Side",
+              "type": "Multifamily",
+              "name": "Westhaven Park Phase IIA",
+              "address": "2237 W. Maypole Ave.",
+              "zip": "60612",
+              "phone": "312-455-0009",
+              "comp": "Interstate Realty Management Co.",
+              "units": "92"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.682817,
+                41.883807
+              ],
+              "type": "Point"
+            },
+            "id": "43944e661d41efa9bab94101ea0f5740"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "Multfamily",
+              "name": "Tierra Linda Apts.",
+              "address": "1858 N. Spaulding Ave.",
+              "zip": "60647",
+              "phone": "773-276-5338",
+              "comp": "LUCHA",
+              "units": "3"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.710688,
+                41.915412
+              ],
+              "type": "Point"
+            },
+            "id": "43955765f4e0219e65e216ac4a255fe2"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Chicago Lawn",
+              "type": "Senior",
+              "name": "Churchview Manor Independent Living",
+              "address": "2626 W. 63rd St.",
+              "zip": "60629",
+              "phone": "773-925-0730",
+              "comp": "Greater Southwest Dev. Corp.",
+              "units": "60"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.689679,
+                41.77928
+              ],
+              "type": "Point"
+            },
+            "id": "44158d37b772a5da53cd50af1fb3fd34"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "North Lawndale",
+              "type": "Multifamily",
+              "name": "Park Douglas",
+              "address": "2707 W. 12th St.",
+              "zip": "60808",
+              "phone": "773-893-4800",
+              "comp": "Interstate Realty Management Co.",
+              "units": "5"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.693753,
+                41.866423
+              ],
+              "type": "Point"
+            },
+            "id": "4488f75ff9d7265c407eae6ccfea856f"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Logan Square",
+              "type": "ARO",
+              "name": "2556 Armtiage LLC",
+              "address": "2556 W. Armitage Ave",
+              "zip": "60647",
+              "phone": "773-252-0600",
+              "comp": "North Clybourn Group",
+              "units": "1"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.692222,
+                41.917804
+              ],
+              "type": "Point"
+            },
+            "id": "45b561dbe3296c26e8ae2c605cf21e84"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Hyde Park",
+              "type": "ARO",
+              "name": "5432-44 S. Woodlawn",
+              "address": "5432 S. Woodlawn Ave.",
+              "zip": "60615",
+              "phone": "312-480-0933",
+              "comp": "Chicago Apartment Finders",
+              "units": "10"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.596735,
+                41.796963
+              ],
+              "type": "Point"
+            },
+            "id": "489091cd8dccd9c808858a561c186ef2"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Douglas",
+              "type": "Multifamily",
+              "name": "South Park Plaza",
+              "address": "2600 S. King Dr.",
+              "zip": "60616",
+              "phone": "312-674-9210",
+              "comp": "Woodlawn Comm. Dev. Corp.",
+              "units": "134"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.617816,
+                41.845652
+              ],
+              "type": "Point"
+            },
+            "id": "48bad6d91c312b93b4864ceee4ac47c9"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "East Garfield Park",
+              "type": "Supportive Housing",
+              "name": "Deborah's Place III",
+              "address": "2822 W. Jackson Blvd.",
+              "zip": "60612",
+              "phone": "773-638-6490",
+              "comp": "Deborah's Place",
+              "units": "90"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.697063,
+                41.877535
+              ],
+              "type": "Point"
+            },
+            "id": "4a872d299624154438ba474be8ba352e"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Dunning",
+              "type": "Senior",
+              "name": "Autumn Green at Wright Campus",
+              "address": "4239 N. Oak Park Ave.",
+              "zip": "60634",
+              "phone": "773-202-3388",
+              "comp": "Senior Lifestyle Corp.",
+              "units": "129"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.797544,
+                41.957692
+              ],
+              "type": "Point"
+            },
+            "id": "4ae33363167c051d7776622a330681d3"
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "community": "Oakland",
+              "type": "Multifamily",
+              "name": "Lakefront Phase II",
+              "address": "4131 S. Lake Park Ave.",
+              "zip": "60653",
+              "phone": "773-548-8795",
+              "comp": "Urban Property Advisors, LLC",
+              "units": "6"
+            },
+            "geometry": {
+              "coordinates": [
+                -87.600165,
+                41.819149
+              ],
+              "type": "Point"
+            },
+            "id": "4b3b37f37b9b6a3e370edd5e6d5ec216"
+          }]};
+
+      // Once the map loads, the following operations occur...
+      map.on('load', function(e) {
+
+       // Add the data to your map as a layer
+       map.addLayer({
+         id: 'rental',
+         type: 'symbol',
+         // Add a GeoJSON source containing place coordinates and information.
+         source: {
+           type: 'geojson',
+           data: rental
+         },
+         layout: {
+           'icon-image': 'border-dot-13',
+           'icon-allow-overlap': true,
+         }
+       });
+
+       // This function generates the listing group -> the function is defined below
+       buildLocationList(rental);
+
+       // If a position is clicked on the map ...
+       map.on('click', function(e) {
+           // Query all the rendered points from the layer
+           var features = map.queryRenderedFeatures(e.point, { layers: ['rental'] });
+           // If the spot is an data point...
+           if (features.length) {
+             var clickedPoint = features[0];
+             // 1. Fly to the point
+             flyToStore(clickedPoint);
+             // 2. Close all other popups and display popup for clicked store
+             createPopUp(clickedPoint);
+             // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+             var activeItem = document.getElementsByClassName('active');
+             if (activeItem[0]) {
+               activeItem[0].classList.remove('active');
+             }
+             // Find the index of the rental.features that corresponds to the clickedPoint that fired the event listener
+             var selectedFeature = clickedPoint.properties.address;
+
+             for (var i = 0; i < rental.features.length; i++) {
+               if (rental.features[i].properties.address === selectedFeature) {
+                 selectedFeatureIndex = i;
+               }
+             }
+             // Select the correct list item using the found index and add the active class
+             var listing = document.getElementById('listing-' + selectedFeatureIndex);
+             listing.classList.add('active');
+           }
+         });
+      });
+
+      function buildLocationList(data) {
+        // Iterate through the list of rentals
+        for (i = 0; i < data.features.length; i++) {
+          var currentFeature = data.features[i];
+          // Shorten data.feature.properties to `prop` so we're not
+          // writing this long form over and over again.
+          var prop = currentFeature.properties;
+          // Select the listing container in the HTML and append a div
+          // with the class 'item' for each rental place
+          var listings = document.getElementById('listings');
+          var listing = listings.appendChild(document.createElement('div'));
+          listing.className = 'item';
+          listing.id = 'listing-' + i;
+
+          // Create a new link with the class 'title' for each rental place
+          // and fill it with the rentals name
+          var link = listing.appendChild(document.createElement('a'));
+          link.href = '#';
+          link.className = 'title';
+          link.dataPosition = i;
+          link.innerHTML = prop.name;
+
+          link.addEventListener('click', function(e) {
+            // Update the currentFeature to the store associated with the clicked link
+            var clickedListing = rental.features[this.dataPosition];
+            // 1. Fly to the point associated with the clicked link
+            flyToStore(clickedListing);
+            // 2. Close all other popups and display popup for clicked store
+            createPopUp(clickedListing);
+            // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+            var activeItem = document.getElementsByClassName('active');
+            if (activeItem[0]) {
+              activeItem[0].classList.remove('active');
+            }
+            this.parentNode.classList.add('active');
+          });
+
+          // Create a new div with the class 'details' for each rental
+          // and fill it with the type of rental and address
+          var details = listing.appendChild(document.createElement('div'));
+          details.innerHTML = '<strong>' + prop.type + '</strong>';
+          details.innerHTML += ' <br> ' + prop.address;
+        }
+      }
+
+      // The createPopUp function definition
+      function createPopUp(currentFeature) {
+             var popUps = document.getElementsByClassName('mapboxgl-popup');
+             // Check if there is already a popup on the map and if so, remove it
+             if (popUps[0]) popUps[0].remove();
+
+             var popup = new mapboxgl.Popup({ closeOnClick: false })
+               .setLngLat(currentFeature.geometry.coordinates)
+               .setHTML('<h5>'+ currentFeature.properties.name + '</h5>' +
+               '<h6><strong>Type</strong>: ' + currentFeature.properties.type + '</h6>' +
+               '<h6><strong>Units</strong>: ' + currentFeature.properties.units + '</h6>' +
+                 '<h6><strong>Address</strong>: ' + currentFeature.properties.address + '</h6>' +
+               '<h6><strong>Company</strong>: ' + currentFeature.properties.comp + '</h6>' +
+              '<h6><strong>Phone</strong>: ' + currentFeature.properties.phone + '</h6>' +
+              '<a href= "https://www.woodlawngrant-apts.com/" class="btn btn-secondary" role="button" target="_blank">Learn More!</a>')
+               .addTo(map); // change url
+               // Because this is a sample, all learn mores are linked to the same url.
+               // For the actual app, you would need to include website link as a data field
+               // in your geojson and reference it like previous examples:
+               // '<a href= "'+ currentFeature.properties.website + '" class="btn btn-secondary" role="button" target="_blank">Learn More!</a>'
+        }
+
+         // A smooth transition from one dot to another
+        function flyToStore(currentFeature) {
+              map.flyTo({
+                center: currentFeature.geometry.coordinates,
+                zoom: 15
+              });
+            }
+     </script>
+   </body>
+  </html>
