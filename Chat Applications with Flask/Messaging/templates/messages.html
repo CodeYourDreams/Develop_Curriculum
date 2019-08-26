@@ -6,16 +6,18 @@
 {% block content %}
     <h1>{{ ('Messages') }}</h1>
 
-    {% for message in msgs %}
-         {% include 'received.html' %}
+
+    {% for message in received %}
+      {% include 'received.html' %}
+      {% for message in sent %}
+        {% include 'sent.html' %}
+      {% endfor %}
     {% endfor %}
 
-    {% for message in msgs2 %}
-      {% include 'sent.html' %}
-    {% endfor %}
 
-  
-    <h1>Hi, {{ current_user.username }}!</h1>
+
+    <h2>Hi, {{ current_user.username }}!</h2>
+    <h3>Send a message to {{ recipient }}: </h3>
 
 
     <div class="container">
@@ -32,24 +34,12 @@
       </div>
     </div>
 
+
+
 <!-- previous messages currently showing in form boxes -->
 
 
-<!--
-    <div class="container">
-      <div class="fixed-bottom">
-        <div class="row">
-            <div class="col-md-4">
-              <form method="POST">
-                {{form.hidden_tag()}}
-                {{form.recipient.label}}{{form.recipient()}} <br>
-                {{form.body.label}}{{form.body()}}
-                {{form.submit()}}
-              </form>
-            </div>
-        </div>
-      </div>
-    </div> -->
+
 
 
     <!-- <nav aria-label="...">

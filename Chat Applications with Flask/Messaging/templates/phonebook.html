@@ -1,0 +1,24 @@
+{% extends "chat_site_home.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block content %}
+
+    <h1>Phonebook</h1>
+    <br>
+    <h2>Hi, {{ current_user.username }}!</h2>
+    <h2>Please choose who you would like to chat with: </h2>
+
+    <div class="jumbotron">
+      <div class="row">
+        <div class="col-md-4">
+          <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token }} <br>
+            {{ wtf.quick_form(form) }}
+          </form>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}
