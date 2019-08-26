@@ -1,5 +1,5 @@
 import os, datetime, getpass
-from chat_forms import LoginForm, MessageForm, PostForm
+from chat_forms import LoginForm, MessageForm, PostForm, RecipientForm
 from flask import Flask, render_template, url_for, redirect, request, flash, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -89,7 +89,6 @@ class MRecieved(Message):
 class User(Document, UserMixin, AnonymousUserMixin):
     username = StringField(max_length = 25, Primary=True)
     id = IntField(default = 0)
-    # user_id = User.objects.count()
     last_seen = DateTimeField(default = datetime.datetime.now())
     last_message_read_time = DateTimeField(default = datetime.datetime.now())
     messages_sent = EmbeddedDocumentField(Message)
@@ -109,17 +108,6 @@ class User(Document, UserMixin, AnonymousUserMixin):
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
-    #
-    # def new_messages(self):
-    #     last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
-    #     return Message.query.filter_by(recipient=self).filter(
-    #         Message.timestamp > last_read_time).count()
-
-    # def __init__(self, username):
-    #     self.username = username
-    # mongoengine doesn't need init
-
-
 
 
 @login.user_loader
@@ -155,7 +143,7 @@ def login():
                 'messages_received' : None,
                 'last_message_read_time' : datetime.datetime.now()
             }
-            # user = User(username=form.username.data)
+
             community = db.users.insert_one(user) # for mongodb
 
         new_user = User(username=form.username.data) # for flask_login
@@ -164,73 +152,69 @@ def login():
         new_user.save()
         login_user(new_user, force = True, fresh = True)
 
-        #
-        # # new_user = User(username=form.username.data)
-        # # user2 = User(username = 'ex@wxample.com').save()
-        # community = db.users.insert_one(new_user)
-        # new_user.last_seen = datetime.datetime.now()
-        # new_user.last_message_read_time = datetime.datetime.now()
-        # community = db.users.update_one(new_user)
-
-        # community = users.insert_one(user)
-
         return redirect(url_for('chat'))
     return render_template('cs_login.html', title='Sign In', form=form)
+
 
 @app.route('/signup')
 def signup():
     pass
 
-@app.route('/send_message/<recipient>', methods=['GET', 'POST'])
-def send_message(recipient):
-    user = User.query.filter_by(username=recipient).first_or_404()
-    form = MessageForm()
+
+@app.route('/chat', methods=['GET', 'POST'])
+@login_required
+def chat():
+
+    form = RecipientForm()
+
     if form.validate_on_submit():
-        msg = Message(author=current_user, recipient=user,
-                      body=form.message.data)
-        db.session.add(msg)
-        db.session.commit()
-        # flash('Your message has been sent.')
-        return redirect(url_for('main.user', username=recipient))
-    return render_template('send_message.html', title=('Send Message'),
-                           form=form, recipient=recipient)
+        user = current_user
+        recipient = form.recipient.data
+        return redirect(url_for('send', recipient = recipient))
+
+    return render_template('phonebook.html', form=form)
 
 
 @app.route('/messages', methods=['GET', 'POST'])
 @login_required
-def chat():
+def send():
 
+    recipient = request.args.get('recipient')
     form = MessageForm()
+
     if form.validate_on_submit():
         user = current_user
         msg = {
             'author' : user.username,
-            'recipient' : form.recipient.data,
+            'recipient' : recipient,
             'body' : form.body.data,
             'timestamp' : datetime.datetime.now()
-        }
+        } # db
         chat = db.messages.insert_one(msg)
         community = db.users.insert_one(msg)
 
+    # flask
     new_message = Message(author=current_user.username,
-                            recipient=form.recipient.data,
+                            recipient=recipient,
                             body=form.body.data,
                             timestamp=datetime.datetime.now())
 
     # add msg to user's messages_sent
     sending = User(username = current_user.username,
                     messages_sent=new_message).save()
-    recieving = User(username=form.recipient.data,
+    recieving = User(username=recipient,
                     messages_received=new_message).save()
-
-
-     # {'username'=current_user.username, 'messages_sent'=new_message})
 
     flash(form.errors)
 
     page = request.args.get('page', 1, type=int)
-    msgs = db.messages.find({'recipient' : current_user.username}).sort('timestamp')
-                            # 'author' : form.recipient.data}).sort('timestamp')
+    received = db.messages.find({'recipient' : current_user.username,
+                                'author' : recipient}).sort('timestamp')
+    sent = db.messages.find({'author' : current_user.username,
+                            'recipient' : recipient}).sort('timestamp')
+
+    msgs = {received, sent}
+    #msgs = received.update(sent)
     # msgs = users.find({
     #                 'username' : current_user.username,
     #                 })
@@ -245,7 +229,8 @@ def chat():
     # prev_url = url_for('login', page=messages.prev_num) \
     #     if messages.has_prev else None
 
-    return render_template('messages.html', form=form, msgs=msgs)
+    return render_template('messages.html', form=form, received=received,
+                            sent=sent, recipient=recipient, msgs=msgs)
                            # next_url=next_url, prev_url=prev_url)
 
 
