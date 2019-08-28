@@ -15,7 +15,9 @@ This repository contains the Code Your Dreams "Development" portion of its year-
 ## Code of Conduct
 Learn more about our [Code of Conduct](http://github.com/CodeYourDreams/Develop_Curriculum/blob/master/Code%20Of%20Conduct.pdf) for all Code Your Dreams related activities. An inclusive community is the best kind of community!
 ## Credits
-Thank you to our fabulous Code Your Dreams team of volunteers, teachers and interns. 
+Special thank you to our fabulous Code Your Dreams team of volunteers, teachers and interns. 
+
+Special thank you to the Lauren Schaefer, Ken Alger from the MongoDB team for their work in producing our [Database curriculum](https://github.com/mongodb-developer/CodeYourDreams)!
 ## License
 <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
 
