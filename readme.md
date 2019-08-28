@@ -8,6 +8,8 @@ Our mission is to amplify the voices of younger generations and embolden them to
 [![CYD Overview][overview-image]][overview-url]
 ## Usage
 This repository contains the Code Your Dreams "Development" portion of its year-long curriculum for students. Topics of community and social justice are tied in with core computer science and Python topics across the curriculum. Take a look at this [Develop Curriculum Map](https://github.com/CodeYourDreams/Develop_Curriculum/blob/master/Curriculum_Map.md) for the curriculum structure.
+
+Each core Module in the Application Development curriculum is numbered from #1 (Programming Components) to #11 (Intro to Flask). Modules #1-#11 are core classes that every Code Your Dreams student go through. After the final Module, #11 (Intro to Flask), the lessons that are taught are specialized toward the students' indiviudal application. For example, a map-based application necessitates different instruction than a chat app. See specific app folders for further instruction (e.g. Mapping Applications with Flask).
 ## Learn More
 1. Visit us at [Code Your Dreams](http://codeyourdreams.org)
 2. Tweet Us at [@codeyourdreams_](http://twitter.com/codeyourdreams_)
