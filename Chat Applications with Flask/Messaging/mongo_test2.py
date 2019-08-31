@@ -1,15 +1,12 @@
-import os, datetime, getpass
-from chat_forms import LoginForm, MessageForm, PostForm, RecipientForm
-from flask import Flask, render_template, url_for, redirect, request, flash, current_app
-from flask_sqlalchemy import SQLAlchemy
+import os, datetime
+from chat_forms import LoginForm, MessageForm, RecipientForm
+from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_migrate import Migrate
 from flask_login import UserMixin, current_user, LoginManager, login_required, login_user, \
 AnonymousUserMixin, fresh_login_required
 from flask_bootstrap import Bootstrap
 
 from mongoengine import *
-
-
 import pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -20,23 +17,21 @@ app = Flask(__name__)
 app.config[ 'SECRET_KEY' ] = 'jsbcfsbfjefebw237u3gdbdc' # encrypts messages
 
 #################################
-### SQL DATABASE SECTION ###########
+###  DATABASE SECTION ###########
 ###################################
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['POSTS_PER_PAGE'] = 30
+ #app.config['POSTS_PER_PAGE'] = 30
 
 client = pymongo.MongoClient("mongodb+srv://apouba:Codeyourdreams@cluster0-x2fzi.mongodb.net/test")
-#client = pymongo.MongoClient("mongodb+srv://apouba:Codeyourdreams@cluster0-x2fzi.mongodb.net/test?retryWrites=true&w=majority")
 # client = pymongo.MongoClient("mongodb+srv://apouba:Codeyourdreams@cluster0-x2fzi.mongodb.net/test?retryWrites=true&w=majority")
-# mongodb+srv://apouba:<password>@cluster0-x2fzi.mongodb.net/test
+# mongodb+srv://<username>:<password>@cluster0-x2fzi.mongodb.net/test
 
 db = client.ChatInfo
 messages = db.messages # collection
 users = db.user # collection
 
-
-Migrate(app,db)
+Migrate(app, db)
 login = LoginManager()
 login.init_app(app)
 bootstrap = Bootstrap(app)
@@ -65,25 +60,20 @@ messages = {
 }
 
 
-class Message(EmbeddedDocument): # DynamicDocument ? / Embedded ?
+class Message(EmbeddedDocument): # mongoengine
     author = StringField()
     recipient = StringField()
     body = StringField()
     timestamp = DateTimeField(default = datetime.datetime.now())
-
-    # messages_sent = ListField(ReferenceField('User'))
-    # messages_recieved = ListField(ReferenceField('User'))
 
     meta = {'allow_inheritance' : True}
 
     def __repr__(self):
         return '<Message {}>'.format(self.body)
 
-class MSent(Message):
-    content = StringField()
-
-class MRecieved(Message):
-    content = StringField()
+#MongoEngine is a Document-Object Mapper (think ORM, but for
+# document databases) for working with MongoDB from Python.
+# It uses a simple declarative API, similar to the Django ORM.
 
 
 class User(Document, UserMixin, AnonymousUserMixin):
@@ -93,6 +83,7 @@ class User(Document, UserMixin, AnonymousUserMixin):
     last_message_read_time = DateTimeField(default = datetime.datetime.now())
     messages_sent = EmbeddedDocumentField(Message)
     messages_received = EmbeddedDocumentField(Message)
+    # image_file = StringField(default="default.jpg" maybe for profile
 
     def is_active(self):
         return True
@@ -106,6 +97,7 @@ class User(Document, UserMixin, AnonymousUserMixin):
     def get_id(self):
         return self.username
 
+
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -116,24 +108,21 @@ def load_user(username):
     if not u:
         return None
     return User(username = u['username'])
-#
-# @login_manager.user_loader
-# def load_user(user_id):
-#     return User.get(user_id)
+
+
 ############################
 ####### ROUTES ############
 ###########################
 
 @app.route( '/' ) # home page
 def index():
-  return render_template( './chat_site_home.html' ) #using html file for this page
+  return render_template( './chat_site_home.html' ) # using html file for this page
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        # user = User.query.filter_by(username=form.username.data).first()
         user = db.users.find_one({'username': form.username.data})
 
         if user is None:
@@ -144,7 +133,7 @@ def login():
                 'last_message_read_time' : datetime.datetime.now()
             }
 
-            community = db.users.insert_one(user) # for mongodb
+            community = db.users.insert_one(user) # for mongoengine
 
         new_user = User(username=form.username.data) # for flask_login
         new_user.last_seen = datetime.datetime.now()
@@ -179,7 +168,7 @@ def chat():
 @login_required
 def send():
 
-    recipient = request.args.get('recipient')
+    recipient = request.args.get('recipient') # from form on last page
     form = MessageForm()
 
     if form.validate_on_submit():
@@ -199,7 +188,7 @@ def send():
                             body=form.body.data,
                             timestamp=datetime.datetime.now())
 
-    # add msg to user's messages_sent
+    # add msg to user's messages_sent & received
     sending = User(username = current_user.username,
                     messages_sent=new_message).save()
     recieving = User(username=recipient,
@@ -208,29 +197,35 @@ def send():
     flash(form.errors)
 
     page = request.args.get('page', 1, type=int)
+
+    # showing messages from database dictionary
     received = db.messages.find({'recipient' : current_user.username,
                                 'author' : recipient}).sort('timestamp')
     sent = db.messages.find({'author' : current_user.username,
                             'recipient' : recipient}).sort('timestamp')
 
-    msgs = {received, sent}
-    #msgs = received.update(sent)
-    # msgs = users.find({
-    #                 'username' : current_user.username,
-    #                 })
-    # msgs = users['messages_received']
-    # db.messages.messages_received
-    # .order_by(
-    #     Message.timestamp.desc()).paginate(
-    #         page, current_app.config['POSTS_PER_PAGE'], False)
+
+    msgs = received, sent
+    ############################################################
+    # trying to combine these to render all sorted by timestamp
+    # and not separated also by sent or received
+
+    # msgs = (received, sent).sort('timestamp')
+    # #msgs = received.update(sent)
+
+    ####################################################################
+    # These were from a blog template but may be helpful for certain apps
 
     # next_url = url_for('index', page=messages.next_num) \
     #     if messages.has_next else None
     # prev_url = url_for('login', page=messages.prev_num) \
     #     if messages.has_prev else None
 
+    # maybe add profile picture or avatar
+    img = user.image_file
+
     return render_template('messages.html', form=form, received=received,
-                            sent=sent, recipient=recipient, msgs=msgs)
+                            sent=sent, recipient=recipient, msgs=msgs, img=img)
                            # next_url=next_url, prev_url=prev_url)
 
 

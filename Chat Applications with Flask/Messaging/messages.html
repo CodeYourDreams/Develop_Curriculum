@@ -1,0 +1,61 @@
+
+{% extends "chat_site_home.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block content %}
+    <h1>{{ ('Messages') }}</h1>
+
+    {% for message in sent %}
+      {% include 'sent.html' %}
+    {% endfor %}
+
+    {% for message in received %}
+      {% include 'received.html' %}
+    {% endfor %}
+
+
+    <h2>Hi, {{ current_user.username }}! {{ img }}</h2>
+    <div class="media">
+      <img class="rounded-circle-account-img" src="{{ image_file }}">
+    </div>
+    <h3>Send a message to {{ recipient }}: </h3>
+
+
+    <div class="container">
+      <div class="fixed_bottom">
+        <div class="row">
+            <div class="col-md-4">
+              <form method="POST">
+                {{ form.hidden_tag() }}
+                {{ form.csrf_token }} <br>
+                {{ wtf.quick_form(form) }}
+              </form>
+            </div>
+        </div>
+      </div>
+    </div>
+
+
+
+<!-- previous messages currently showing in form boxes -->
+
+
+
+<!-- for next or prev urls -->
+
+    <!-- <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url  or '#'}}">
+                    <span aria-hidden="true">&larr;</span> {{ 'Older messages' }}
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    {{ 'Newer messages' }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav> -->
+{% endblock %}
