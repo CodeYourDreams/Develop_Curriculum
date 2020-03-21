@@ -1,0 +1,20 @@
+<!-- index.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome to {{ school_name }}</h1>
+<h3>Students</h3>
+<ul>
+    {% for student in students %}
+    <li>
+        <!-- Because we're calling the student(name) function in app.py, we need to pass the name variable to url_for() -->
+        <!-- Note that name=student doesn't use brackets because the variable is already in the url_for() function -->
+        <a href="{{ url_for('student', name=student) }}">{{ student }}</a>
+        {% if student == 'Trish' %}
+        Welcome Trish!
+        {% endif %}
+    </li>
+    <!-- With templates, you MUST end conditionals with endfor or endif -->
+    {% endfor %}
+</ul>
+{% endblock %}
