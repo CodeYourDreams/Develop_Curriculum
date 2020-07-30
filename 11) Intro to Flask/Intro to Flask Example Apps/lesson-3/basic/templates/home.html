@@ -1,0 +1,18 @@
+<!-- home.html -->
+<h1> Welcome to the Puppy Survey</h1>
+<form method='post'>
+    {{form.hidden_tag()}}
+    {{form.breed.label}}{{form.breed}}
+    <br><!-- A <br> is a line break to separate each input -->
+    {{form.neutered.label}}{{form.neutered}}
+    <br>
+    {{form.food_choice.label}}{{form.food_choice}}
+    <br>
+    {{form.mood.label}}{{form.mood}}
+    <br>
+    Any other feedback?
+    <br>
+    {{form.feedback}}
+    <br>
+    {{form.submit}}
+</form>
