@@ -29,9 +29,12 @@ To create a curriculum tailored to data science, these modules should be incorpo
 
 ## Content Outline
 - DS1) Working with Data
-	- Importing data
-	- Exploring data
+	- Introduction to pandas
+	- Importing and exploring data
 	- Manipulating data
+		- Boolean indexing (filtering)
+		- Applying functions
+		- Sorting data
 - DS2) Interpreting Data
 	- Measures of center and spread
 	- Boxplots
