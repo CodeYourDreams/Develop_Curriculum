@@ -38,6 +38,7 @@ To create a curriculum tailored to data science, these modules should be incorpo
 - DS2) Interpreting Data
 	- Measures of center and spread
 	- Boxplots
+	- Exploratory histograms
 	- Visualizing correlation with heat maps
 - DS3) Data Visualization
 	- Types of plots
