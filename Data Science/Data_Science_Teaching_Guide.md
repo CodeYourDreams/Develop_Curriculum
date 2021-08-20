@@ -45,6 +45,6 @@ To create a curriculum tailored to data science, these modules should be incorpo
 		- Bar plots
 		- Histograms
 		- Scatterplots
-	- Matplotlib and Plot styling
+	- [*Under Construction*] Matplotlib and Plot styling
 - DS4) Making Predictions with Data
 	- Linear Regression
