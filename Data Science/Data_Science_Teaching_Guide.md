@@ -47,4 +47,36 @@ To create a curriculum tailored to data science, these modules should be incorpo
 		- Scatterplots
 	- [*Under Construction*] Matplotlib and Plot styling
 - DS4) Making Predictions with Data
-	- Linear Regression
+	- Linear Regressin
+
+
+
+## Version 2 Draft Outline  (Business Intelligence x Data Science)
+Prerequisites: Required background in basic Linux, basic Python, Pandas, basic HTML, basic CSS, Jinja2, Pipenv and Dependency management. 
+
+Learning Objectives:
+### Goal is to create a course in which a student learns how to hone in on a data project based on a client or user-centered problem, conduct data discovery and EDA, design a data science model, and determine a end user focused method for sharing that model with the user. 
+- Matplotlib
+- Dash / Flask
+- Simple Deployment strategies 
+
+
+- 1) Identify the question
+    - example: 
+	   - Pizza slices by the number
+	   - volume of international travellers 
+   
+- 2) Finding the Data
+    ### Useful Data Sources:
+    - https://www.freecodecamp.org/news/https-medium-freecodecamp-org-best-free-open-data-sources-anyone-can-use-a65b514b0f2d/
+    - https://www.who.int/data/gho/data/themes/
+
+- 3) Exploratory Data Analysis
+- 4) Model Identification
+- 5) Feature mining
+- 5) Presentation 
+    - Create an interactive Flask app to display data
+
+
+- Future Ideas:
+    - Image processing

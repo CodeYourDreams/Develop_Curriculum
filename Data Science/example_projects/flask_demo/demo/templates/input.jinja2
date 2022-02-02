@@ -1,0 +1,16 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="card">
+  <h1 class="site-title">{{ title }}</h1>
+  
+  <p class="subtitle">Ad Hoc Street Pricing Portal.</p>
+  <form method="post" action="{{ url_for('make_new_job') }}">
+    <input type="submit" value="Input New Job" />
+  </form>
+  <a href="/filtermatches/" class="dash-link">
+    <span>Filter your matches.</span>
+  <i class="fas fa-arrow-right"></i>
+  </a>
+</div>
+{% endblock %}
